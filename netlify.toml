@@ -1,6 +1,6 @@
 # Configuration de build pour Next.js sur Netlify
 [build]
-  command = "npm run build"
+  command = "prisma generate && npm run build"
   publish = ".next"
 
 [[plugins]]
