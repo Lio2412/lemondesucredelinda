@@ -23,8 +23,6 @@ export const prisma =
     // dans des environnements serverless comme Netlify
     errorFormat: 'pretty',
     log: ['error', 'warn'],
-    // Réduire le nombre de connexions simultanées
-    connection_limit: 5,
   })
 
 // Si nous sommes en développement, assigne l'instance créée à la variable globale.
