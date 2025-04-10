@@ -18,6 +18,7 @@ interface Creation {
   description: string | null;
   image: string | null;
   createdAt: Date;
+  updatedAt: Date; // Ajouter cette propriété manquante
 }
 
 interface CreationPageProps {
