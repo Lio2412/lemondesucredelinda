@@ -14,6 +14,17 @@ export const prisma =
   new PrismaClient({
     // Optionnel: active les logs Prisma si nécessaire
     // log: ['query', 'info', 'warn', 'error'],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL
+      },
+    },
+    // Ajouter ces options pour améliorer la fiabilité de la connexion
+    // dans des environnements serverless comme Netlify
+    errorFormat: 'pretty',
+    log: ['error', 'warn'],
+    // Réduire le nombre de connexions simultanées
+    connection_limit: 5,
   })
 
 // Si nous sommes en développement, assigne l'instance créée à la variable globale.
