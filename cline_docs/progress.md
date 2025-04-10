@@ -1,0 +1,66 @@
+# Progression
+
+- **Ce qui fonctionne :**
+    - Structure de base du projet Next.js initialisée.
+    - **Gestion des Recettes (Refonte Complète) :**
+        - **Structure Données :** Schéma Prisma mis à jour avec `Recipe` (slug, description, temps, etc.), `Ingredient` (structuré), `RecipeStep` (structuré). Migration appliquée.
+        - **CRUD Admin :** Formulaire (`RecipeForm`) gère tous les champs et l'upload d'image. API (POST/PUT/DELETE) gèrent la structure relationnelle et le stockage/suppression d'images (Supabase). Page d'édition pré-remplit correctement. Liste (`/admin/recipes`) affiche le compte des étapes.
+        - **Affichage Public :** Page liste (`/recettes`) utilise le `slug` pour les liens. Page détail (`/recettes/[slug]`) affiche les données structurées.
+        - **Mode Cuisine :** Fonctionnel avec les données structurées.
+    - **Gestion des Créations connectée à la BDD via Prisma :**
+        - Liste (`/admin/creations`), ajout (`/admin/creations/new`), modification (`/admin/creations/[id]/edit`).
+        - Affichage public (`/creations`, `/creations/[id]`).
+        - Composant `CreationForm` envoie les données (y compris image réelle via FormData) à l'API `/api/creations`.
+        - Fonctions d'accès aux données dans `lib/data/creations.ts` utilisent Prisma.
+        - Script de seeding `prisma/seed.ts` pour les données initiales.
+    - Installation et configuration de `date-fns`, `react-day-picker`, `Popover`, `Toast`.
+    - **Gestion des Articles connectée à la BDD via Prisma :**
+        - Liste (`/admin/articles`), ajout (`/admin/articles/new`), modification (`/admin/articles/[id]/edit`), suppression.
+        - Affichage public (`/blog`).
+        - Composant `ArticleForm` connecté aux API POST/PUT.
+        - Routes API `/api/articles` (POST) et `/api/articles/[id]` (PUT, DELETE) créées.
+    - **Dashboard Admin (`/admin`) finalisé et dynamisé :**
+        - Connexion complète aux données Prisma (compteurs et section dynamique "Derniers contenus ajoutés").
+        - Barre latérale nettoyée, réorganisée et stylisée.
+    - **Page Analytics (`/admin/analytics`) dynamisée :**
+        - Connectée aux données Prisma (`lib/data/analytics.ts`).
+        - Affiche les chiffres clés réels (comptes totaux).
+        - Affiche la table des 5 derniers contenus (`RecentContentTable.tsx`).
+        - Affiche les graphiques dynamiques : publications/mois (`MonthlyContentChart.tsx`) et répartition/type (`ContentTypePieChart.tsx`).
+    - Structure de données : Instance Prisma partagée (`lib/prisma.ts`). Les fonctions `getAllRecipes`, `getAllCreations`, `getAllArticles` dans `lib/data/` utilisent Prisma pour récupérer les données nécessaires au dashboard. Type `ContentItem` simplifié dans `types.ts`.
+    - **Authentification Admin (Mock) implémentée :**
+        - Protection des routes `/admin/*` via middleware et cookie.
+        - Page de connexion `/admin/login`.
+        - Contexte d'authentification (`AuthProvider`) pour gérer l'état et les actions `signIn`/`signOut`.
+        - Bouton de connexion/déconnexion dynamique dans le Header.
+    - **Correction Erreur Client Component :**
+        - Résolution de l'erreur `async/await` sur la page d'accueil en refactorisant `app/page.tsx` (Server Component) et `components/creations/LastCreations.tsx`.
+        - Extraction de la section Héros dans `components/home/HeroSection.tsx` (Client Component).
+    - **Refonte Barre de Navigation (`Header.tsx`) :**
+        - Disposition équilibrée (Logo gauche, Navigation centre, Actions droite).
+        - Actions admin (Dashboard, Déconnexion) regroupées dans un `DropdownMenu` discret pour les admins connectés.
+        - Correction redirection après connexion.
+        - Installation dépendance `@radix-ui/react-dropdown-menu`.
+        - **Ajout Menu Mobile Responsive :** Remplacement de l'ancien menu par un `Sheet` (Shadcn UI) pour les écrans ≤ 768px.
+    - **Page Contact (`/contact`) finalisée :**
+        - Email affiché mis à jour.
+        - Formulaire connecté à l'API `/api/contact` pour envoi via Resend.
+        - Notifications de succès/erreur via Sonner.
+        - Retour visuel (bouton désactivé + animation) pendant l'envoi.
+        - Champ honeypot anti-spam ajouté.
+    - **Fonctionnalité Newsletter :**
+        - Inscription via formulaire (`NewsletterForm.tsx`).
+        - API `/api/newsletter` gère la validation, l'enregistrement BDD (Prisma) et l'envoi d'email de bienvenue (Resend).
+        - **Page Admin (`/admin/newsletter`) refondue :** Affiche le formulaire de création et l'historique des envois. Permet de "Renvoyer" une ancienne newsletter (pré-remplissage via localStorage).
+        - Correction de l'erreur d'hydratation (`div` dans `p`) dans la liste de l'historique.
+        - Affichage du nombre de destinataires (`recipientCount`) dans l'historique des campagnes.
+    - **Pages Légales :** Création, contenu, style, SEO et liens footer pour "Mentions Légales" et "Politique de Confidentialité" finalisés.
+- **Ce qui reste à construire :**
+    - **Mode Cuisine :** Fonctionnel.
+    - **Gestion Upload Images :** Implémentée pour Recettes et Créations. A vérifier/ajouter pour Articles.
+    - **Gestion Données Complexes Formulaires :** Structure de base pour Recettes (ingrédients/étapes) implémentée. A affiner si besoin (ex: tags/catégories Articles).
+    - Affinement éventuel de la page Analytics (ex: ajout de métriques plus complexes).
+    - Gestion des catégories/tags dans les formulaires.
+    - Remplacement de l'authentification mockée par une solution robuste (ex: NextAuth.js).
+
+- **État d'avancement général :** Environ 95% (configuration initiale + CRUD complet Recettes/Créations/Articles connecté BDD + **Refonte Recettes terminée (structure, image, mode cuisine)** + dashboard admin dynamique + **page analytics dynamique** + authentification admin mockée + **page contact fonctionnelle** + corrections diverses).

@@ -1,0 +1,25 @@
+# Contexte Technique
+
+- Technologies :
+    - Next.js (dernière version)
+    - React
+    - TypeScript
+    - Tailwind CSS
+    - shadcn/ui (pour les composants UI)
+    - `react-hook-form` (gestion des formulaires)
+    - `@hookform/resolvers` (intégration avec Zod)
+    - `zod` (validation de schémas)
+    - `lucide-react` (icônes)
+    - `js-cookie` (gestion des cookies côté client)
+    - `@types/js-cookie` (types TypeScript pour js-cookie)
+    - `prisma`, `@prisma/client` (ORM et client base de données)
+    - `@next-auth/prisma-adapter` (Adaptateur NextAuth pour Prisma)
+    - `bcryptjs`, `@types/bcryptjs` (Hachage de mot de passe pour NextAuth)
+    - `ts-node`, `dotenv-cli` (Pour le script de seeding Prisma)
+    - `@radix-ui/react-alert-dialog` (Composant pour les boîtes de dialogue de confirmation shadcn/ui)
+    - `uuid`, `@types/uuid` (Génération d'ID uniques pour les noms de fichiers image)
+    - `npm-run-all` (Pour exécuter des scripts npm séquentiellement, utilisé pour le seeding)
+    - `resend` (envoi d'emails via API, pour formulaire de contact)
+- Environnement de développement : Standard Node.js, lancement avec `npm run dev`.
+    - `sonner` (notifications toast, pour formulaire de contact)
+- Contraintes : L'authentification actuelle est une simulation. La base de données (Supabase/PostgreSQL) est configurée via la variable d'environnement `DATABASE_URL` (utilisée par Prisma, peut être nommée `SUPABASE_URL` dans ce projet). La gestion des données pour Recettes, Créations et Articles est assurée par Prisma. Le stockage des images (Recettes, Créations) est géré via Supabase Storage (bucket "images"). L'envoi d'emails (contact, newsletter) nécessite la variable d'environnement `RESEND_API_KEY` et utilise les adresses `newsletter@lemondesucredelinda.com` et `contact@lemondesucredelinda.com`.

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json", // Hérite de la configuration principale
+  "compilerOptions": {
+    "module": "CommonJS", // Compiler en CommonJS pour Node.js
+    "moduleResolution": "Node", // Surcharger l'option héritée incompatible
+    "outDir": "./dist-seed", // Dossier de sortie pour le JS compilé
+    "rootDir": "./prisma", // Dossier racine contenant le TS à compiler
+    "noEmit": false, // Important: Autoriser l'émission de fichiers JS
+    "isolatedModules": false // Peut être nécessaire pour la compilation non-ESM
+  },
+  "include": ["prisma/seed.ts"], // Inclure uniquement le script de seed
+  "exclude": ["node_modules", "**/*.test.ts"] // Exclure le reste
+}

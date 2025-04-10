@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Variables CSS essentielles pour la visibilité de base */
+    --background: 0 0% 100%; /* White */
+    --foreground: 240 10% 3.9%; /* Dark Gray */
+    
+    /* Primary: Using pastry-500 (#FF6B6B) */
+    --primary: 0 100% 71%;
+    --primary-foreground: 0 0% 100%; /* White text on pink */
+
+    /* Secondary: Light Gray */
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 9%; /* Dark text on light gray */
+
+    /* Muted: Lighter Gray */
+    --muted: 240 5% 98%;
+    --muted-foreground: 240 4% 46%;
+
+    /* Accent: Using pastry-400 (#FF8989) */
+    --accent: 0 100% 76%;
+    --accent-foreground: 0 0% 100%; /* White text on lighter pink */
+
+    /* Destructive: Using pastry-700 (#FF2E2E) */
+    --destructive: 0 100% 59%;
+    --destructive-foreground: 0 0% 100%; /* White text on darker red */
+
+    /* Border */
+    --border: 240 6% 90%;
+    --input: 240 6% 90%; /* Input border same as general border */
+    --ring: 0 100% 71%; /* Primary color for focus rings */
+
+    --radius: 0.5rem; /* Keep radius */
+  }
+
+  .dark {
+    /* Variables CSS essentielles pour la visibilité de base (dark mode) */
+    /* Dark mode adjustments - keeping it simple for now */
+    --background: 240 10% 3.9%; /* Dark Gray */
+    --foreground: 0 0% 98%; /* White */
+    --primary: 0 100% 71%; /* Same pink as light mode */
+    --primary-foreground: 0 0% 10%; /* Dark text on pink */
+    --secondary: 240 4% 10%; /* Darker gray */
+    --secondary-foreground: 0 0% 98%; /* White text */
+    --muted: 240 4% 10%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 100% 76%; /* Lighter pink */
+    --accent-foreground: 0 0% 10%; /* Dark text */
+    --destructive: 0 100% 59%; /* Darker red */
+    --destructive-foreground: 0 0% 98%; /* White text */
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 100% 71%; /* Primary pink */
+    --radius: 0.5rem; /* Keep radius */
+  }
+}
+
+@layer base {
+  * {
+    /* Appliquer la bordure par défaut en utilisant la variable */
+    @apply border-[hsl(var(--border))];
+  }
+  body {
+     /* Appliquer le fond et le texte par défaut en utilisant les variables */
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
+  }
+}

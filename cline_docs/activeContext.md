@@ -1,0 +1,173 @@
+# Contexte Actif
+
+Travail actuel : Finalisation de la mise à jour de la documentation suite à l'amélioration de l'historique des newsletters (ajout recipientCount).
+
+Changements récents :
+- **Finalisation Pages Légales :** Création, mise à jour du contenu, style, SEO et ajout des liens dans le footer pour les pages "Mentions Légales" et "Politique de Confidentialité".
+- **Implémentation Newsletter :**
+    - Création de la route API `/api/newsletter/route.ts` (validation, création/vérification abonné Prisma, envoi email de bienvenue via Resend).
+    - Mise à jour du composant frontend `components/layout/NewsletterForm.tsx` pour appeler l'API et gérer l'état/notifications (Sonner).
+- **Refonte Barre de Navigation (`components/layout/Header.tsx`) :**
+    - Restructuration pour une disposition équilibrée (Logo gauche, Navigation centre, Actions droite).
+    - Utilisation de `flex justify-between` et `flex-1` pour le centrage de la navigation.
+    - Remplacement des liens admin directs par un `DropdownMenu` (shadcn/ui) déclenché par une icône utilisateur (`User2`) pour les admins connectés (contient Dashboard et Déconnexion).
+    - Style discret pour les éléments admin.
+    - Correction de la redirection après connexion admin vers `/admin` (`app/login/page.tsx`).
+    - Installation de la dépendance `@radix-ui/react-dropdown-menu`.
+- **Dynamisation Section "Derniers Contenus" Admin (`app/admin/page.tsx`) :**
+    - Remplacement de la section statique par une version dynamique connectée à Prisma.
+    - Récupération des 5 derniers contenus (Recipe, Creation, Article) via Prisma.
+    - Correction des fonctions `getAllRecipes` (`lib/data/recipes.ts`) et `getAllArticles` (`lib/data/articles.ts`) pour utiliser Prisma au lieu des mocks.
+    - Mise à jour du style des badges de type (rose, bleu, orange).
+    - Correction des liens d'édition pour chaque type de contenu.
+    - Simplification du type `ContentItem` dans `types.ts` pour correspondre aux données affichées.
+- **Nettoyage de la Sidebar Admin (`app/admin/layout.tsx`) :**
+    - Suppression des liens "Utilisateurs" et "Paramètres".
+    - Activation du lien "Analytics".
+    - Centrage des éléments de navigation (icône + texte) et ajout d'un séparateur.
+- **Création de la page Analytics (`app/admin/analytics/page.tsx`) :**
+    - Installation de `recharts`.
+    - Création de la page avec titre, graphiques mockés (publications/semaine, répartition/type) et statistiques clés mockées.
+- **Gestion des données mockées :**
+    - Création de `types.ts` pour les types globaux (Recipe, Creation, Article, ContentItem).
+    - Création de `lib/data/recipes.ts` et `lib/data/articles.ts` avec données et fonctions mockées.
+    - Refactorisation de `lib/data/creations.ts` pour utiliser les types globaux et exporter `getAllCreations`.
+- **Mise en place de l'authentification Admin (Mock) :**
+   - Création de la page de connexion (`app/admin/login/page.tsx`) avec formulaire et validation Zod.
+   - Création du middleware (`middleware.ts`) pour protéger les routes `/admin/*` via cookie.
+   - Création du `AuthProvider` (`components/providers/AuthProvider.tsx`) avec `useAuth` hook pour gérer l'état (via cookie) et les fonctions `signIn`/`signOut`.
+   - Intégration de `AuthProvider` dans `app/layout.tsx`.
+   - Mise à jour de `app/admin/login/page.tsx` pour utiliser `useAuth`.
+   - Mise à jour de `components/layout/Header.tsx` pour afficher conditionnellement Connexion/Déconnexion.
+   - Installation de `js-cookie` et `@types/js-cookie`.
+- **Correction Erreur Client Component :**
+   - Correction de l'erreur `async/await is not yet supported in Client Components` sur `app/page.tsx`.
+   - Transformation de `app/page.tsx` en Server Component (retrait `'use client'`).
+   - Extraction de la section Héros interactive dans `components/home/HeroSection.tsx` (Client Component).
+   - Modification de `components/creations/LastCreations.tsx` pour recevoir les données en props.
+   - Récupération des données pour `LastCreations` dans `app/page.tsx` et passage en props.
+- **Migration des données Créations vers Prisma :**
+    - Ajout des modèles Prisma pour `Recipe`, `Creation`, `Article`.
+    - Création d'un script de seeding (`prisma/seed.ts`) pour les créations.
+    - Exécution du seeding.
+    - Refactorisation de `lib/data/creations.ts` pour utiliser Prisma Client.
+    - Mise à jour des composants (`CreationCard`, `LastCreations`, `CreationsGrid`, `CreationsTable`) et des pages (`/creations`, `/creations/[id]`, `/admin/creations`, `/admin/page`, `/page`) pour utiliser les nouvelles fonctions et types Prisma.
+    - Correction des erreurs liées aux Server/Client Components et aux types.
+- **Connexion complète des données Recettes et Articles à Prisma :**
+    - Création de l'instance Prisma partagée (`lib/prisma.ts`) et refactorisation de `lib/data/creations.ts`.
+    - **Admin Recettes :**
+        - Connexion de `/admin/recipes/page.tsx` à Prisma.
+        - Création/Mise à jour de `components/admin/RecipesTable.tsx` (affichage + suppression API).
+        - Connexion de `/admin/recipes/[id]/edit/page.tsx` à Prisma (avec transformation des données).
+        - Mise à jour de `components/admin/RecipeForm.tsx` pour gérer la création (POST) et la modification (PUT) via API.
+        - Création des routes API `/api/recipes/route.ts` (POST) et `/api/recipes/[id]/route.ts` (PUT, DELETE).
+    - **Admin Créations (Vérification/Finalisation) :**
+        - Vérification de `/admin/creations/page.tsx` (déjà connecté).
+        - Mise à jour de `components/admin/CreationsTable.tsx` pour appeler l'API DELETE avec confirmation.
+        - Vérification de `/admin/creations/[id]/edit/page.tsx` (déjà connecté).
+        - Mise à jour de `components/admin/CreationForm.tsx` pour gérer POST et PUT via API.
+        - Création de la route API `/api/creations/[id]/route.ts` (PUT, DELETE) (la route POST existait déjà).
+    - **Admin Articles :**
+        - Connexion de `/admin/articles/page.tsx` à Prisma.
+        - Création/Mise à jour de `components/admin/ArticlesTable.tsx` (affichage + suppression API).
+        - Connexion de `/admin/articles/[id]/edit/page.tsx` à Prisma (avec transformation des données).
+        - Mise à jour de `components/admin/ArticleForm.tsx` pour gérer POST et PUT via API.
+        - Création des routes API `/api/articles/route.ts` (POST) et `/api/articles/[id]/route.ts` (PUT, DELETE).
+    - **Pages Publiques :**
+        - Transformation de `/app/recettes/page.tsx` en Server Component, récupération via Prisma.
+        - Création/Mise à jour de `components/recipe/RecipeGrid.tsx` (Client Component pour affichage/filtre).
+        - Vérification de `/app/creations/page.tsx` (déjà Server Component connecté).
+        - Transformation de `/app/blog/page.tsx` en Server Component, récupération via Prisma.
+        - Création/Mise à jour de `components/blog/BlogGrid.tsx` (Client Component pour affichage/filtre/pagination).
+    - **Corrections diverses :**
+        - Correction des erreurs TypeScript liées aux types Prisma et aux props des composants.
+        - Correction de l'erreur `framer-motion` dans les Server Components (`/recettes`, `/blog`) via `AnimatedPageTitle`.
+        - Installation de `@radix-ui/react-alert-dialog`.
+        - Correction des avertissements d'hydratation dans `RecipesTable` et `ArticlesTable`.
+- **Mise à jour de la documentation (`README.md`, `cline_docs/*`) suite à la connexion complète des données Prisma.**
+- **Correction Logique CRUD Admin :**
+    - Assuré que les formulaires d'édition (`/admin/{type}/[id]/edit`) utilisent bien la méthode `PUT` vers `/api/{type}/{id}` au lieu de `POST`.
+    - Corrigé le passage de l'ID de la création dans `app/admin/creations/[id]/edit/page.tsx`.
+    - Mis à jour les routes API `POST /api/articles` et `PUT /api/articles/[id]` pour gérer tous les champs du formulaire (slug, excerpt, publishedAt, imageUrl).
+    - Activé la modification d'image pour les Créations : `CreationForm.tsx` envoie `FormData` si une nouvelle image est sélectionnée, et la route `PUT /api/creations/[id]` gère l'upload/suppression vers Supabase.
+- **Refonte Gestion Recettes :**
+    - **Schéma Prisma :** Modifié `Recipe` pour inclure `slug`, `description`, `difficulty`, `prepTime`, `cookTime`, `basePortions`, `category`. Ajout des modèles `Ingredient` (name, quantity, unit) et `RecipeStep` (order, description, duration) avec relations vers `Recipe`.
+    - **Migration :** Réinitialisation de la base de données et application de la nouvelle structure via `prisma migrate reset` et `prisma migrate dev`. Résolution des problèmes de seeding (`package.json`, `tsconfig.seed.json`, `prisma/seed.ts`).
+    - **API Recettes (`/api/recipes`, `/api/recipes/[id]`) :** Mises à jour pour gérer la nouvelle structure relationnelle (transactions Prisma pour créer/mettre à jour/supprimer `Recipe`, `Ingredient`, `RecipeStep`). Gestion de l'upload/suppression d'images vers Supabase Storage (bucket "images") via `FormData`.
+    - **Formulaire Admin (`RecipeForm.tsx`) :** Ajout des nouveaux champs. Envoi des données structurées (y compris image via `FormData`).
+    - **Page Édition Admin (`/admin/recipes/[id]/edit/page.tsx`) :** Mise à jour pour récupérer les données complètes (via `getRecipeById`) et les formater correctement pour le formulaire.
+    - **Page Détail Publique (`/recettes/[slug]/page.tsx`) :** Mise à jour pour utiliser `getRecipeBySlug`, afficher les données structurées. Création de `CookingModeWrapper.tsx` (Client Component) pour gérer l'état du `CookingMode`. Correction du lien pour utiliser le `slug`. Ajout de `default.tsx` pour résoudre un avertissement de route parallèle.
+    - **Composants Recette (`RecipeGrid.tsx`, `RecipeCard.tsx`, `CookingMode.tsx`) :** Mis à jour pour utiliser le `slug` et les types de données structurées (`string` pour les ID d'étapes).
+    - **Liste Admin (`/admin/recipes/page.tsx`, `RecipesTable.tsx`) :** Mise à jour pour récupérer et afficher le nombre d'étapes via `_count`.
+- **Correction Fonctionnalité Articles :**
+    - **Schéma Prisma :** Ajout des champs `slug` (@unique), `excerpt` (String?), `image` (String?), `publishedAt` (DateTime?) au modèle `Article`. Migration de la base de données (`prisma migrate dev`) et régénération du client Prisma (`prisma generate`).
+    - **API Articles :** Assuré que les routes API gèrent les nouveaux champs (implicitement corrigé par la mise à jour du schéma et du client).
+    - **Affichage Liste (`app/blog/page.tsx`, `components/blog/BlogGrid.tsx`) :**
+        - Modification de `app/blog/page.tsx` pour sélectionner les champs `slug` et `image` lors de la récupération des articles.
+        - Modification de `components/blog/BlogGrid.tsx` pour utiliser `article.slug` dans les liens (`/blog/[slug]`) et afficher `article.image`. Correction des types et de la gestion de `article.image` (optionnel).
+    - **Affichage Détail (`app/blog/[slug]/page.tsx`) :**
+        - Transformation en Server Component.
+        - Création de la fonction `getArticleBySlug` dans `lib/data/articles.ts` pour récupérer les données depuis Prisma.
+        - Remplacement de la logique de données mockées par l'appel à `getArticleBySlug`.
+        - Adaptation de l'affichage aux champs réels du modèle `Article` Prisma.
+        - Isolation de l'animation `framer-motion` du titre dans un Client Component dédié (`components/blog/AnimatedArticleTitle.tsx`) pour résoudre l'erreur RSC.
+    - **Configuration Next.js (`next.config.js`) :** Ajout du hostname `img.freepik.com` aux `remotePatterns` pour autoriser l'optimisation des images externes via `next/image`.
+    - **Formulaire d'Édition (`app/admin/articles/[id]/edit/page.tsx`, `components/admin/ArticleForm.tsx`) :**
+        - Modification de la page d'édition pour récupérer tous les champs de l'article (`slug`, `excerpt`, `image`, `publishedAt`) via Prisma.
+        - Mise à jour du formulaire (`ArticleForm`) et de son schéma Zod pour accepter et gérer correctement les valeurs `null` ou vides pour les champs optionnels (`excerpt`, `image`, `publishedAt`), assurant le pré-remplissage correct lors de l'édition.
+- **Dynamisation Page Analytics (`app/admin/analytics/page.tsx`) :**
+    - Transformation de la page en Server Component pour la récupération des données Prisma.
+    - Création de `lib/data/analytics.ts` avec les fonctions `getTotalCounts`, `getRecentContents`, `getMonthlyContentData`.
+    - Affichage des comptes totaux réels (Recettes, Créations, Articles).
+    - Création du composant `components/admin/analytics/RecentContentTable.tsx` (Client) pour afficher les 5 derniers contenus avec liens d'édition.
+    - Création du composant `components/admin/analytics/MonthlyContentChart.tsx` (Client) pour afficher les publications par mois (BarChart).
+    - Création du composant `components/admin/analytics/ContentTypePieChart.tsx` (Client) pour afficher la répartition des types de contenu (PieChart).
+    - Intégration des composants Client dans la page Server Component avec passage des données en props.
+    - Correction des erreurs de typage dans les composants Recharts.
+- **Ajout Menu Mobile Responsive (`components/layout/Header.tsx`) :**
+    - Remplacement de l'ancien menu mobile (Dropdown) par un `Sheet` (Shadcn UI) pour les écrans ≤ 768px (`md`).
+    - Le `Sheet` contient les liens de navigation principaux et les actions admin/connexion.
+    - Utilisation de `md:hidden` et `hidden md:flex` pour gérer l'affichage responsive.
+    - Import de `Separator` et `Sheet` de `@/components/ui/`.
+- **Finalisation Page Contact (`/contact`) :**
+    - Mise à jour de l'email de contact affiché (`Linda.rassegna@hotmail.be`).
+    - Création de la route API `/api/contact/route.ts` pour l'envoi d'email via **Resend**.
+        - Gestion de la clé API `RESEND_API_KEY` via variable d'environnement.
+        - Ajout d'un champ honeypot simple pour anti-spam.
+        - Ajout de `replyTo` dans l'email envoyé.
+    - Connexion du formulaire frontend (`app/contact/page.tsx`) à l'API :
+        - Appel `fetch` vers l'API.
+        - Gestion de l'état de soumission (`isSubmitting`) avec désactivation et animation `animate-pulse` du bouton.
+        - Installation et intégration de **Sonner** pour les notifications toast (`toast.success`, `toast.error`) avec icône de succès.
+        - Remplacement du Toaster `shadcn/ui` par celui de `sonner` dans `app/layout.tsx`.
+        - Réinitialisation du formulaire après succès.
+- **Configuration Emails (Resend) :**
+    - Mise à jour des adresses d'expédition pour utiliser des adresses distinctes : `newsletter@lemondesucredelinda.com` pour la newsletter et `contact@lemondesucredelinda.com` pour le formulaire de contact.
+    - Confirmation de l'utilisation du champ `replyTo` pour le formulaire de contact afin de faciliter les réponses directes à l'expéditeur.
+- **Refonte Page Admin Newsletter (`/admin/newsletter`) :**
+    - Consolidation du formulaire de création et de la liste de l'historique sur une seule page (`app/admin/newsletter/page.tsx`).
+    - Création de la page d'historique initiale (`app/admin/newsletter/history/page.tsx`) avec récupération des données Prisma et bouton "Renvoyer" (stockage localStorage).
+    - Création du composant client `ResendButtonWrapper.tsx` pour la logique du bouton "Renvoyer".
+    - Modification de la page de création initiale (`app/admin/newsletter/page.tsx`) pour charger le brouillon depuis localStorage.
+    - Installation de la dépendance `@radix-ui/react-scroll-area` manquante.
+    - Résolution des erreurs Prisma via redémarrage du serveur TS.
+    - Extraction du formulaire dans `components/admin/newsletter/NewsletterForm.tsx` (Client).
+    - Extraction de la liste d'historique dans `components/admin/newsletter/NewsletterHistoryList.tsx`.
+    - Déplacement de `ResendButtonWrapper.tsx` vers `components/admin/newsletter/`.
+    - Transformation de `app/admin/newsletter/page.tsx` en Server Component pour récupérer les données et afficher les composants enfants.
+    - Suppression du lien "Historique" redondant dans `app/admin/layout.tsx`.
+    - Suppression de l'ancien dossier `app/admin/newsletter/history`.
+- **Correction Hydratation Newsletter :** Résolution de l'erreur "div cannot be a descendant of p" dans `NewsletterHistoryList.tsx` en déplaçant un composant `Badge`.
+- **Amélioration Historique Newsletter (Affichage Compte Destinataires) :**
+    - Ajout du champ `recipientCount` (Integer) au modèle Prisma `NewsletterCampaign`.
+    - Modification de la route API `/api/send-newsletter` pour calculer et enregistrer `recipientCount` lors de l'envoi.
+    - Mise à jour du composant `components/admin/newsletter/NewsletterHistoryList.tsx` pour afficher le `recipientCount`.
+    - Exécution de la migration Prisma (`npx prisma migrate dev --name add_recipient_count`).
+- **Mise à jour Image Hero :** Remplacement de l'image principale de la page d'accueil par `public/images/Header.png`.
+
+
+Prochaines étapes :
+- Remplacer l'authentification mockée par une solution robuste (ex: NextAuth.js).
+- Vérifier/Adapter la gestion des slugs pour Articles et Créations si nécessaire.
+- Ajouter la gestion des catégories/tags pour les articles dans le formulaire et l'API.
+- Vérifier/Adapter les slugs (actuellement non gérés ou utilisant l'ID).

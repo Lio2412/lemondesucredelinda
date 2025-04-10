@@ -1,0 +1,154 @@
+datasource db {
+  provider = "postgresql"
+  // Assurez-vous que cette variable d'environnement pointe vers l'URL de connexion DIRECTE
+  // à votre base de données PostgreSQL Supabase (ex: postgresql://postgres:[YOUR-PASSWORD]@[AWS-REGION].pooler.supabase.com:5432/postgres)
+  // et non l'URL de l'API Supabase.
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modèle User utilisé par NextAuth et l'adaptateur Supabase/Prisma
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique // Email doit être non-nul pour CredentialsProvider
+  password      String    // Ajout du champ mot de passe
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("admin") // Rôle par défaut pour les nouveaux utilisateurs
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // Pas besoin de @@map("users") avec PrismaAdapter par défaut
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  // Pas besoin de @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Pas besoin de @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  // Pas besoin de @@map("verification_tokens")
+}
+
+
+// Modèles spécifiques à l'application (structure Recette améliorée)
+model Recipe {
+  id           String       @id @default(cuid())
+  title        String
+  slug         String       @unique // Ajouter un slug unique
+  description  String?      @db.Text // Description optionnelle
+  image        String?      // Image peut être optionnelle
+  difficulty   String?      // Ex: Facile, Moyen, Difficile
+  prepTime     Int?         // Temps de préparation en minutes
+  cookTime     Int?         // Temps de cuisson en minutes
+  basePortions Int          // Nombre de portions de base
+  category     String?      // Catégorie de la recette
+
+  ingredients Ingredient[] // Relation vers les ingrédients
+  steps       RecipeStep[] // Relation vers les étapes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ingredient {
+  id       String @id @default(cuid())
+  name     String
+  quantity Float // Utiliser Float pour gérer les décimaux (ex: 0.5 sachet)
+  unit     String // Ex: g, ml, pcs, cuillère à café
+
+  recipeId String // Clé étrangère vers Recipe
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade) // Relation
+
+  @@index([recipeId]) // Index pour améliorer les requêtes
+}
+
+model RecipeStep {
+  id          String  @id @default(cuid())
+  order       Int // Pour définir l'ordre des étapes
+  description String  @db.Text
+  duration    Int? // Durée optionnelle en secondes (ou minutes, à décider)
+
+  recipeId String // Clé étrangère vers Recipe
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade) // Relation
+
+  @@unique([recipeId, order]) // Assurer un ordre unique par recette
+  @@index([recipeId]) // Index pour améliorer les requêtes
+}
+
+model Creation {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image       String? // Image peut être optionnelle
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // @@map facultatif, Prisma utilisera "Creation" par défaut
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  title       String
+  slug        String    @unique // Ajout du slug unique
+  excerpt     String?   @db.Text // Ajout de l'extrait optionnel
+  content     String    @db.Text // Utiliser Text pour les contenus longs
+  image       String?   // Ajout de l'image optionnelle
+  tags        String[]
+  publishedAt DateTime? // Ajout de la date de publication optionnelle
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // @@map facultatif, Prisma utilisera "Article" par défaut
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model NewsletterCampaign {
+  id        String   @id @default(cuid())
+  title     String
+  message   String   @db.Text // Utiliser @db.Text pour les messages potentiellement longs
+  sentAt    DateTime @default(now())
+  scheduledAt DateTime? // Date de planification optionnelle
+  recipientCount Int @default(0)
+
+}
