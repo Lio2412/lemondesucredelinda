@@ -37,11 +37,23 @@ export async function generateMetadata({ params }: CreationPageProps): Promise<M
 }
 
 // Fonction pour générer les chemins statiques au moment du build
+// MODIFIÉ: Retourne un tableau vide pour éviter l'erreur de connexion à la base de données pendant le build
+// Les pages seront générées à la demande, en mode dynamique
 export async function generateStaticParams() {
-  const creations = await getAllCreations(); // Récupérer toutes les créations
-  return creations.map((creation) => ({
-    id: creation.id, // Utiliser l'ID
-  }));
+  // Contourner l'accès à la base de données pendant le build
+  console.log("Contournement de l'accès à la base de données pendant le build");
+  return [];
+  
+  // Code original commenté:
+  // try {
+  //   const creations = await getAllCreations(); // Récupérer toutes les créations
+  //   return creations.map((creation) => ({
+  //     id: creation.id, // Utiliser l'ID
+  //   }));
+  // } catch (error) {
+  //   console.error("Erreur lors de la génération des paramètres statiques:", error);
+  //   return []; // Retourne un tableau vide en cas d'erreur
+  // }
 }
 
 export default async function CreationPage({ params }: CreationPageProps) { // Rendre async
