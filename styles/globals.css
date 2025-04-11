@@ -31,7 +31,7 @@
     /* Border */
     --border: 240 6% 90%;
     --input: 240 6% 90%; /* Input border same as general border */
-    --ring: 0 100% 71%; /* Primary color for focus rings */
+    --ring: 210 90% 60%; /* Nouveau: Bleu standard pour focus */
 
     --radius: 0.5rem; /* Keep radius */
   }
@@ -53,7 +53,7 @@
     --destructive-foreground: 0 0% 98%; /* White text */
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 0 100% 71%; /* Primary pink */
+    --ring: 210 90% 70%; /* Nouveau: Bleu standard (plus clair) pour focus en mode sombre */
     --radius: 0.5rem; /* Keep radius */
   }
 }
