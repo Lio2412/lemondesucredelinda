@@ -106,7 +106,7 @@ export default function BlogGrid({ articles }: BlogGridProps) {
             placeholder="Rechercher des articles..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full border-gray-300 dark:border-gray-600 pr-12 py-2 dark:bg-gray-800 dark:text-white focus:border-pink-500 dark:focus:border-pink-400 focus:ring-pink-500/20"
+            className="w-full rounded-full border-gray-300 dark:border-gray-600 pr-12 py-2 dark:bg-gray-800 dark:text-white focus:border-pink-500 dark:focus:border-pink-400 focus:ring-pink-500/20 focus:outline-none"
           />
           <Button
             type="submit"

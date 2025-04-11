@@ -280,7 +280,8 @@ export function ArticleForm({ initialData, articleId, onSubmitSuccess }: Article
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                {/* Ajout des classes pour opacité */}
+                <PopoverContent className="w-auto p-0 bg-background border shadow-md" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value ?? undefined} // Convertir null en undefined pour react-day-picker
