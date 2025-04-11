@@ -149,7 +149,7 @@ export default async function CreationPage({ params }: CreationPageProps) { // R
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {similarCreations.map((similarCreation) => (
                 // Utiliser l'ID comme clé
-                <CreationCard key={similarCreation.id} creation={similarCreation} />
+                <CreationCard key={similarCreation.id} creation={{ ...similarCreation, description: similarCreation.description ?? '' }} />
               ))}
             </div>
           </section>
