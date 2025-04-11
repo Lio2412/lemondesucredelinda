@@ -186,7 +186,8 @@ export default function Header({ userRole }: HeaderProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   {/* Utilisation de User2 et ajustement style/taille */}
-                  <Button variant="ghost" size="icon" className="rounded-full text-gray-500 hover:text-pink-600 hover:bg-pink-50/50 dark:hover:bg-pink-900/20">
+                  {/* Ajout des classes pour supprimer l'anneau de focus */}
+                  <Button variant="ghost" size="icon" className="rounded-full text-gray-500 hover:text-pink-600 hover:bg-pink-50/50 dark:hover:bg-pink-900/20 focus-visible:ring-0 focus-visible:ring-offset-0">
                     <User2 className="w-5 h-5" />
                     <span className="sr-only">Menu administrateur</span>
                   </Button>
