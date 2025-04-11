@@ -57,7 +57,8 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
         <Input
           type="text"
           placeholder="Rechercher une recette..."
-          className="pl-10 pr-4 py-2 w-full border rounded-full border-gray-300 dark:border-gray-600 focus:border-pink-500 dark:focus:border-pink-400 dark:bg-gray-800 dark:text-white focus:outline-none"
+          /* Suppression focus:border-* et focus:outline-none */
+          className="pl-10 pr-4 py-2 w-full border rounded-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
