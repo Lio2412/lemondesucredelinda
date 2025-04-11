@@ -25,12 +25,12 @@ export default function AboutPage() {
       <section className="mb-12 flex justify-center">
         {/* Conteneur pour l'image animée */}
         {/* Ajustement de la taille du conteneur à w-40 h-40 */}
-        <div className="w-40 h-40 rounded-full bg-white overflow-hidden shadow-xl mx-auto"> {/* Utilisation de shadow-xl et mx-auto comme demandé */}
+        <div className="w-40 h-40 rounded-full overflow-hidden shadow-xl mx-auto"> 
           <motion.div // Utilisation de motion.div pour animer l'image à l'intérieur
              initial={{ opacity: 0, scale: 0.9 }}
              animate={{ opacity: 1, scale: 1 }}
              transition={{ duration: 0.6, ease: "easeOut" }}
-             className="w-full h-full" // Assure que la div animée prend toute la place
+             className="w-full h-full bg-white" 
           >
             <Image
               src="/images/about-profile.jpg"
