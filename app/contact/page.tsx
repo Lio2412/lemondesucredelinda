@@ -190,7 +190,7 @@ export default function ContactPage() {
                   <SelectTrigger className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <SelectValue placeholder="Sélectionnez un sujet" />
                   </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                  <SelectContent className="bg-background border shadow-md dark:bg-gray-800 dark:border-gray-700">
                     <SelectItem value="question" className="dark:text-white dark:focus:bg-gray-700">Question générale</SelectItem>
                     <SelectItem value="collaboration" className="dark:text-white dark:focus:bg-gray-700">Proposition de collaboration</SelectItem>
                     <SelectItem value="recette" className="dark:text-white dark:focus:bg-gray-700">Question sur une recette</SelectItem>

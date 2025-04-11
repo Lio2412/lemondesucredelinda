@@ -168,7 +168,7 @@ export function NewsletterForm() {
                 <SelectTrigger id="template">
                   <SelectValue placeholder="Choisir un template" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border shadow-md">
                   {Object.values(newsletterTemplates).map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}

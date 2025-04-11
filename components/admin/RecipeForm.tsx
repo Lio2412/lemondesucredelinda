@@ -293,7 +293,7 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
                           <SelectValue placeholder="Sélectionner une catégorie" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-background border shadow-md">
                         {categories.map((cat) => (
                           <SelectItem key={cat.value} value={cat.value}>
                             {cat.label}
@@ -399,7 +399,7 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
                           <SelectValue placeholder="Sélectionner difficulté" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-background border shadow-md">
                         <SelectItem value="Facile">Facile</SelectItem>
                         <SelectItem value="Moyen">Moyen</SelectItem>
                         <SelectItem value="Difficile">Difficile</SelectItem>
