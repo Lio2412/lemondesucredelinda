@@ -191,7 +191,7 @@ export default function Header({ userRole }: HeaderProps) {
                     <span className="sr-only">Menu administrateur</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-48 bg-background border shadow-md">
                   {/* Simplification du contenu pour correspondre à l'exemple */}
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/admin" className="flex items-center gap-2 text-sm">
