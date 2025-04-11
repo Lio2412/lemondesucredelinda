@@ -60,6 +60,15 @@
   }
 }
 
+/* Ajout pour forcer la suppression de l'outline */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  /* Optionnel: si le ring seul ne suffit pas visuellement */
+  /* box-shadow: 0 0 0 2px hsl(var(--ring)); */
+}
+
 @layer base {
   * {
     /* Appliquer la bordure par défaut en utilisant la variable */
