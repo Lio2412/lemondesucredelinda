@@ -10,7 +10,8 @@
     "migrate:dev": "dotenv -e .env.local -- npx prisma migrate dev",
     "db:seed": "dotenv -e .env.local -- ts-node --compiler-options \"{\\\"module\\\": \\\"CommonJS\\\"}\" prisma/seed.ts",
     "seed:compile": "tsc -p tsconfig.seed.json",
-    "seed:run": "dotenv -e .env.local -- node dist-seed/seed.js"
+    "seed:run": "dotenv -e .env.local -- node dist-seed/seed.js",
+    "postbuild": "next-sitemap"
   },
   "prisma": {
     "seed": "run-s seed:compile seed:run"
@@ -48,6 +49,7 @@
     "lucide-react": "^0.395.0",
     "next": "14.2.4",
     "next-auth": "^4.24.11",
+    "next-sitemap": "^4.2.3",
     "next-themes": "^0.3.0",
     "prisma": "^6.5.0",
     "react": "^18",
