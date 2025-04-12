@@ -25,11 +25,9 @@ export default async function RootLayout({ // Ajouter async ici
 }: {
   children: React.ReactNode;
 }) {
-  // Récupérer la session côté serveur (déjà présent, mais on s'assure que les imports sont là)
-  const session = await getServerSession(authOptions);
-
-  // Passer userRole au composant Header
-  const userRole = session?.user?.role; // Obtenir le rôle (peut être undefined ou null)
+  // La session est récupérée dans NextAuthProvider et utilisée par Header via useSession
+  // const session = await getServerSession(authOptions);
+  // const userRole = session?.user?.role; // Plus nécessaire ici
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -40,7 +38,7 @@ export default async function RootLayout({ // Ajouter async ici
           {/* Utiliser le wrapper NextAuthProvider qui est un Client Component */}
           <NextAuthProvider>
             <div className="relative flex min-h-screen flex-col">
-              <Header userRole={userRole} />
+              <Header />
               <main className="flex-1">
                 {children}
               </main>
