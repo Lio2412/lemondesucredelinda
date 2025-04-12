@@ -106,7 +106,7 @@ export default async function CreationPage({ params }: CreationPageProps) { // R
           {image && ( // Afficher l'image seulement si elle existe
             <div className="w-full h-[300px] md:h-[400px] rounded-xl shadow-lg overflow-hidden mb-8 md:mb-12 relative">
               <Image
-                src={image} // Utiliser 'image'
+                src={`${image}?v=${Date.now()}`} // Ajouter le paramètre de cache-busting
                 alt={`Image de ${title}`}
                 fill
                 className="object-cover"

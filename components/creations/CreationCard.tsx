@@ -34,7 +34,9 @@ const CreationCard = ({ creation }: CreationCardProps) => {
           <Image
             // Utiliser un placeholder si l'image est null OU si c'est une URL mockée
             // Utiliser default-recipe.jpg comme placeholder
-            src={image && !image.startsWith('/images/uploads/mock/') ? image : '/images/default-recipe.jpg'}
+            src={image && !image.startsWith('/images/uploads/mock/') 
+              ? `${image}?v=${Date.now()}` 
+              : '/images/default-recipe.jpg'}
             alt={`Image de ${title}`}
             fill
             style={{ objectFit: 'cover' }}
