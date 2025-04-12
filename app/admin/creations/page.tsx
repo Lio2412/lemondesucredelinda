@@ -7,6 +7,9 @@ import { Plus } from 'lucide-react';
 import { getAllCreations } from '@/lib/data/creations';
 import CreationsTable from '@/components/admin/CreationsTable'; // Importer le nouveau composant client
 
+// Force la page à être rendue dynamiquement à chaque requête
+export const dynamic = 'force-dynamic';
+
 export default async function AdminCreationsPage() { // Rendre async
   // Récupérer les données depuis la base de données
   const creations = await getAllCreations();
