@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.lemondesucredelinda.com
+
+# Sitemaps
+Sitemap: https://www.lemondesucredelinda.com/sitemap.xml

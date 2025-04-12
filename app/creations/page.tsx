@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'; // Force le rendu SSR à chaque requête
 // Ce composant redevient un Server Component
 
 import { getAllCreations } from '@/lib/data/creations'; // Importer la fonction de récupération

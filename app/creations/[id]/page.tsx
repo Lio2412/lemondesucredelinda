@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'; // Force le rendu SSR à chaque requête
 // IMPORTANT: Ce fichier doit être dans un dossier nommé [id], pas [slug]
 
 import { getCreationById, getAllCreations } from '@/lib/data/creations'; // Importer les fonctions Prisma
