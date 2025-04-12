@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client/edge'
+import { withAccelerate } from '@prisma/extension-accelerate'
 
 // Déclare une variable globale pour stocker l'instance de PrismaClient
 // afin qu'elle ne soit pas recréée à chaque rechargement à chaud en développement.
@@ -23,9 +24,9 @@ export const prisma =
     // dans des environnements serverless comme Netlify
     errorFormat: 'pretty',
     log: ['error', 'warn'],
-  })
+  }).$extends(withAccelerate())
 
 // Si nous sommes en développement, assigne l'instance créée à la variable globale.
 if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma
+  global.prisma = prisma as any;
 }
