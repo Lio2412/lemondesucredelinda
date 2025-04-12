@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye, EyeOff } from 'lucide-react'; // Importer les icônes
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // État pour la visibilité MDP
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,18 +76,36 @@ export default function LoginPage() {
                 className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 placeholder-gray-400" // Style input clair
               />
             </div>
-            <div className="space-y-2">
+            {/* Mettre le label et le champ mot de passe dans un div relatif */}
+            <div className="space-y-2 relative">
               <Label htmlFor="password" className="text-gray-700">Mot de passe</Label>
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"} // Type dynamique
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 placeholder-gray-400" // Style input clair
+                // Ajouter un padding à droite pour ne pas superposer l'icône
+                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-pink-500 focus:border-pink-500 block w-full p-2.5 pr-10 placeholder-gray-400" 
               />
+              {/* Bouton pour afficher/masquer */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-[28px] h-7 w-7 px-0 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" // Ajuster top si label prend plus de place
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                disabled={isLoading}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
             </div>
             {error && (
               <p className="text-sm text-red-600 text-center">{error}</p>
