@@ -61,8 +61,10 @@ export default function RecipesTable({ recipes }: RecipesTableProps) {
         <TableHeader>
           <TableRow>{/* No extra whitespace */}
             <TableHead>Nom de la recette</TableHead>
-            <TableHead>Date d’ajout</TableHead>
-            <TableHead className="text-center">Nombre d’étapes</TableHead>{/* Placeholder */}
+            {/* Masquer sur écrans < sm */}
+            <TableHead className="hidden sm:table-cell">Date d’ajout</TableHead>
+            {/* Masquer sur écrans < md */}
+            <TableHead className="hidden md:table-cell text-center">Nombre d’étapes</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>{/* No extra whitespace */}
         </TableHeader>
@@ -70,8 +72,10 @@ export default function RecipesTable({ recipes }: RecipesTableProps) {
           {recipes.map((recipe) => (
             <TableRow key={recipe.id}>{/* No extra whitespace */}
               <TableCell className="font-medium">{recipe.title}</TableCell>
-              <TableCell>{new Date(recipe.createdAt).toLocaleDateString()}</TableCell>
-              <TableCell className="text-center">
+              {/* Masquer sur écrans < sm */}
+              <TableCell className="hidden sm:table-cell">{new Date(recipe.createdAt).toLocaleDateString()}</TableCell>
+              {/* Masquer sur écrans < md */}
+              <TableCell className="hidden md:table-cell text-center">
                 {/* Utiliser le comptage fourni par Prisma */}
                 <Badge variant="secondary">{recipe._count.steps}</Badge>
               </TableCell>

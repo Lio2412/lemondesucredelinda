@@ -62,7 +62,8 @@ export default function CreationsTable({ creations }: CreationsTableProps) {
           <TableRow>
             <TableHead className="w-[80px]">Image</TableHead>
             <TableHead>Titre</TableHead>
-            <TableHead className="w-[150px]">Date</TableHead>
+            {/* Masquer sur < sm */}
+            <TableHead className="w-[150px] hidden sm:table-cell">Date</TableHead>
             <TableHead className="w-[120px] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -79,7 +80,8 @@ export default function CreationsTable({ creations }: CreationsTableProps) {
                 />
               </TableCell>
               <TableCell className="font-medium">{creation.title}</TableCell>
-              <TableCell>{formatDate(creation.createdAt)}</TableCell>
+              {/* Masquer sur < sm */}
+              <TableCell className="hidden sm:table-cell">{formatDate(creation.createdAt)}</TableCell>
               <TableCell className="text-right space-x-2">
                 <Button variant="outline" size="icon" asChild>
                   <Link href={`/admin/creations/${creation.id}/edit`}>
