@@ -17,6 +17,7 @@ export const getAllCreations = async (): Promise<Creation[]> => {
       "DATABASE_URL non définie");
     
     const creations = await prisma.creation.findMany({
+      where: { published: true },
       orderBy: {
         createdAt: 'desc', // Optionnel: trier par défaut
       },
@@ -59,6 +60,7 @@ export const getAllCreations = async (): Promise<Creation[]> => {
 export const getLastCreations = async (count: number = 5): Promise<Creation[]> => {
    try {
     const creations = await prisma.creation.findMany({
+      where: { published: true },
       orderBy: {
         createdAt: 'desc',
       },

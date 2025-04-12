@@ -96,6 +96,12 @@ nouveau-projet-linda/
 ├── tsconfig.json            # Configuration TypeScript principale
 └── tsconfig.seed.json       # Configuration TypeScript pour la compilation du script de seed
 ```
+## Changelog
+
+### 12/04/2025
+- **Forçage du SSR (Server-Side Rendering) sur les pages `/creations` et `/creations/[id]`**  
+  Les pages `app/creations/page.tsx` et `app/creations/[id]/page.tsx` utilisent désormais le SSR forcé afin de garantir la propagation instantanée des modifications sur le site public (par exemple lors de la création, modification ou suppression d’une création).  
+  _Modification poussée sur la branche principale le 12/04/2025 (voir Git pour le commit exact)._
 
 ## Dépendances Clés Ajoutées
 

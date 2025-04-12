@@ -1,6 +1,7 @@
 # Contexte Actif
 
 Travail actuel : Finalisation de la mise à jour de la documentation suite à l'amélioration de l'historique des newsletters (ajout recipientCount).
+Mise à jour du SSR sur les pages de créations pour garantir la propagation instantanée des modifications sur le site public.
 
 Changements récents :
 - **Finalisation Pages Légales :** Création, mise à jour du contenu, style, SEO et ajout des liens dans le footer pour les pages "Mentions Légales" et "Politique de Confidentialité".
@@ -164,6 +165,10 @@ Changements récents :
     - Mise à jour du composant `components/admin/newsletter/NewsletterHistoryList.tsx` pour afficher le `recipientCount`.
     - Exécution de la migration Prisma (`npx prisma migrate dev --name add_recipient_count`).
 - **Mise à jour Image Hero :** Remplacement de l'image principale de la page d'accueil par `public/images/Header.png`.
+- **Forçage SSR sur les pages Créations :**
+    - Les pages `app/creations/page.tsx` et `app/creations/[id]/page.tsx` forcent désormais le Server Side Rendering (SSR).
+    - Objectif : garantir que toute modification d’une création (ajout, édition, suppression) soit immédiatement visible sur le site public, sans délai de propagation lié au cache ISR/SSG.
+    - Changement poussé sur la branche principale.
 
 
 Prochaines étapes :

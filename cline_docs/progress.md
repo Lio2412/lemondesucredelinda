@@ -12,6 +12,8 @@
         - Affichage public (`/creations`, `/creations/[id]`).
         - Composant `CreationForm` envoie les données (y compris image réelle via FormData) à l'API `/api/creations`.
         - Fonctions d'accès aux données dans `lib/data/creations.ts` utilisent Prisma.
+        - **Pages `/creations` et `/creations/[id]` :**
+            - Forçage du Server Side Rendering (SSR) pour garantir la propagation instantanée de toute modification (ajout, édition, suppression) sur le site public, sans délai lié au cache.
         - Script de seeding `prisma/seed.ts` pour les données initiales.
     - Installation et configuration de `date-fns`, `react-day-picker`, `Popover`, `Toast`.
     - **Gestion des Articles connectée à la BDD via Prisma :**

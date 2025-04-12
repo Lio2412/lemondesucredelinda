@@ -28,3 +28,11 @@ Pour professionnaliser la communication et simplifier la gestion des réponses p
 - `contact@lemondesucredelinda.com` pour les emails envoyés depuis le formulaire de contact.
 
 Le formulaire de contact utilise également le champ `replyTo` avec l'adresse email fournie par l'utilisateur, permettant à Linda de répondre directement depuis sa boîte de réception.
+
+---
+
+## Stratégie SSR sur les pages de créations
+
+Pour garantir la fraîcheur des données et la propagation instantanée de toute modification (ajout, édition, suppression) sur le site public, les pages `app/creations/page.tsx` et `app/creations/[id]/page.tsx` forcent le Server Side Rendering (SSR).
+Ce choix désactive le cache ISR/SSG pour ces pages, assurant que chaque requête affiche l’état le plus à jour des créations, sans délai de propagation.
+Cette stratégie a été adoptée suite à des besoins de cohérence immédiate entre l’interface d’administration et le site public.

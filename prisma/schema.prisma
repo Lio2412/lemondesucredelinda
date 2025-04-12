@@ -118,6 +118,7 @@ model Creation {
   image       String? // Image peut être optionnelle
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  published   Boolean   @default(false)
 
   // @@map facultatif, Prisma utilisera "Creation" par défaut
 }

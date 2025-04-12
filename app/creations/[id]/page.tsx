@@ -10,17 +10,9 @@ import AnimatedTitle from '@/components/creations/AnimatedTitle';
 import CreationCard from '@/components/creations/CreationCard';
 import { Metadata } from 'next';
 // Corriger l'import du type Creation
-import type { PrismaClient } from '@prisma/client'; 
-
-// Définir notre propre type en se basant sur les retours des fonctions
-interface Creation {
-  id: string;
-  title: string;
-  description: string | null;
-  image: string | null;
+import type { Creation } from '@prisma/client';
   createdAt: Date;
   updatedAt: Date; // Ajouter cette propriété manquante
-}
 
 interface CreationPageProps {
   params: {
@@ -150,7 +142,7 @@ export default async function CreationPage({ params }: CreationPageProps) { // R
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {similarCreations.map((similarCreation) => (
                 // Utiliser l'ID comme clé
-                <CreationCard key={similarCreation.id} creation={{ ...similarCreation, description: similarCreation.description ?? '' }} />
+                <CreationCard key={similarCreation.id} creation={similarCreation} />
               ))}
             </div>
           </section>
