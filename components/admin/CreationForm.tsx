@@ -180,7 +180,6 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
         onSubmitSuccess();
       } else {
         router.push('/admin/creations');
-        router.refresh();
       }
     // Bloc catch unique restauré
     } catch (error) {
