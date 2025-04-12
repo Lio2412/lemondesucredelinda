@@ -140,19 +140,16 @@ export async function PUT(
         throw new Error(`Erreur lors de l'upload de l'image: ${uploadError.message}`);
       }
 
-      // Obtenir l'URL publique
-      const { data: publicUrlData } = supabaseAdminClient.storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(filePath);
-
-      if (!publicUrlData?.publicUrl) {
-        console.error("Impossible d'obtenir l'URL publique pour:", filePath);
-        // Gérer l'erreur: ici on choisit de ne pas mettre à jour l'image
-        newImageUrl = oldImageUrl; // Garder l'ancienne URL en cas d'échec d'obtention de la nouvelle
-      } else {
-        newImageUrl = publicUrlData.publicUrl;
-        // Ajouter la nouvelle URL aux données à mettre à jour
+      // Nouvelle méthode : Construire l'URL manuellement
+      const supabasePublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; // Assurez-vous que cette variable existe
+      if (supabasePublicUrl) {
+        newImageUrl = `${supabasePublicUrl}/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
         dataToUpdate.image = newImageUrl;
+        console.log("URL publique construite :", newImageUrl); // Log pour vérifier
+      } else {
+        console.error("NEXT_PUBLIC_SUPABASE_URL n'est pas définie. Impossible de construire l'URL publique.");
+        newImageUrl = oldImageUrl; // Garder l'ancienne URL en cas d'échec
+        // Pas de dataToUpdate.image ici
       }
     }
     // Si aucune nouvelle image n'est fournie, dataToUpdate.image reste non défini,
