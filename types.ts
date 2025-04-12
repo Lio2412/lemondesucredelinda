@@ -29,6 +29,7 @@ export interface Creation {
   title: string;
   description: string; // Est non-optionnel dans Prisma
   image: string | null; // Correspond à 'image: String?' dans Prisma
+  published: boolean; // Ajouté pour correspondre au modèle Prisma
   createdAt: Date;
   updatedAt: Date;
   // category?: string; // N'existe pas dans le modèle Prisma actuel
