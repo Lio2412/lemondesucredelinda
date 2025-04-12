@@ -20,7 +20,8 @@ export const getAllCreations = async (): Promise<Creation[]> => {
       orderBy: {
         createdAt: 'desc', // Optionnel: trier par défaut
       },
-      cacheStrategy: { ttl: 0 } // Désactiver le cache Accelerate
+      // Supprimer cacheStrategy car Accelerate est désactivé
+      // cacheStrategy: { ttl: 0 }
     });
     
     console.log(`Récupération réussie de ${creations.length} créations`);
