@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true, // Configuration par défaut, peut être ajustée
   images: {
+    minimumCacheTTL: 60, // Re-valider les images toutes les 60 secondes
     remotePatterns: [
       {
         protocol: 'https',

@@ -72,7 +72,7 @@ export default function CreationsTable({ creations }: CreationsTableProps) {
             <TableRow key={creation.id}>
               <TableCell>
                 <Image
-                  src={`${creation.image || '/images/default-recipe.jpg'}?v=${Date.now()}`}
+                  src={creation.image || '/images/default-recipe.jpg'}
                   alt={creation.title}
                   width={50}
                   height={50}
