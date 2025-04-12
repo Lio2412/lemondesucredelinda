@@ -181,6 +181,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       } else {
         // router.push('/admin/creations'); // Ancienne redirection
         router.refresh(); // Nouvelle méthode pour rafraîchir les données serveur
+        router.push('/admin/creations'); // Remettre la redirection APRÈS le refresh
       }
     // Bloc catch unique restauré
     } catch (error) {
