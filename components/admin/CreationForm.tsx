@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast"; // Restaurer chemin original
 import Image from 'next/image'; // Pour la preview
+import { useQueryClient } from '@tanstack/react-query'; // Importation ajoutée
 
 import { Button } from '@/components/ui/button';
 import {
@@ -57,6 +58,7 @@ interface CreationFormProps {
 export function CreationForm({ initialData, creationId, onSubmitSuccess }: CreationFormProps) { // Props restaurées
   const router = useRouter();
   const { toast } = useToast();
+  const queryClient = useQueryClient(); // Client React Query
   // State pour imagePreview restauré
   const [imagePreview, setImagePreview] = useState<string | null>(
     typeof initialData?.imageUrl === 'string' ? initialData.imageUrl : null
@@ -162,6 +164,9 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
           title: "Succès", // Simplifié le titre
           description: "✅ Création mise à jour avec succès !",
         });
+        // Invalider les caches React Query
+        queryClient.invalidateQueries({ queryKey: ['creation', creationId] });
+        queryClient.invalidateQueries({ queryKey: ['creations'] });
       } else if (!creationId && response.ok) {
         // Garder un message pour la création si nécessaire
          toast({
