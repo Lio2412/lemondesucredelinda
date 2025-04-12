@@ -179,7 +179,8 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       if (onSubmitSuccess) {
         onSubmitSuccess();
       } else {
-        router.push('/admin/creations');
+        // router.push('/admin/creations'); // Ancienne redirection
+        router.refresh(); // Nouvelle méthode pour rafraîchir les données serveur
       }
     // Bloc catch unique restauré
     } catch (error) {
