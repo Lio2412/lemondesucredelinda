@@ -1,7 +1,8 @@
 # Contexte Actif
 
-Travail actuel : Mise à jour de la documentation (Memory Bank, README) suite à l'implémentation de la logique de publication pour les Créations et Recettes. Tâche terminée.
+Travail actuel : Mise à jour de la documentation (Memory Bank, README) suite aux corrections de style de l'image de création.
 Changements récents :
+- **Correction Style Image Création (`app/creations/[id]/page.tsx`) :** Ajustement du style pour afficher l'image entièrement, avec coins arrondis et sans espace blanc superflu.
 - **Finalisation Pages Légales :** Création, mise à jour du contenu, style, SEO et ajout des liens dans le footer pour les pages "Mentions Légales" et "Politique de Confidentialité".
 - **Implémentation Newsletter :**
     - Création de la route API `/api/newsletter/route.ts` (validation, création/vérification abonné Prisma, envoi email de bienvenue via Resend).
