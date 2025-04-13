@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     let category: string | undefined;
     let ingredients: IngredientData[];
     let steps: StepData[];
+    let published: boolean = false; // Initialiser published
     let imageFile: File | undefined = undefined;
     let imageUrl: string | undefined = undefined; // Pour l'URL finale
 
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
       category = formData.get('category') as string | undefined;
       const ingredientsStr = formData.get('ingredients') as string;
       const stepsStr = formData.get('steps') as string;
+      const publishedStr = formData.get('published') as string | null; // Récupérer published
       const image = formData.get('image') as File | null;
 
       if (!title || !slug || !basePortions || !ingredientsStr || !stepsStr) {
@@ -66,6 +68,8 @@ export async function POST(req: Request) {
       } catch (e) {
         return NextResponse.json({ error: 'Données ingrédients/étapes invalides', details: e }, { status: 400 });
       }
+      // Convertir published (vient de FormData comme string 'true'/'false')
+      published = publishedStr === 'true';
 
       if (image) {
         imageFile = image;
@@ -84,6 +88,7 @@ export async function POST(req: Request) {
       category = jsonData.category;
       ingredients = z.array(ingredientSchema).min(1).parse(jsonData.ingredients); // Valider
       steps = z.array(stepSchema).min(1).parse(jsonData.steps); // Valider
+      published = typeof jsonData.published === 'boolean' ? jsonData.published : false; // Récupérer published du JSON
       if (typeof jsonData.image === 'string') {
         imageUrl = jsonData.image; // Peu probable en création, mais possible
       }
@@ -133,6 +138,7 @@ export async function POST(req: Request) {
           basePortions,
           category,
           image: imageUrl,
+          published, // Ajouter published aux données Prisma
           // Ne pas inclure ingredients et steps ici, on les crée séparément
         },
       });

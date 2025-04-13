@@ -27,7 +27,7 @@ import { ContentItem } from '@/types'; // Importer le type combiné
 
 export default async function AdminDashboardPage() { // Rendre la page asynchrone
   // Charger les données
-  const recipes = await getAllRecipes();
+  const recipes = await getAllRecipes({ includeUnpublished: true }); // Inclure les non publiées pour le comptage admin
   const creations = await getAllCreations({ includeUnpublished: true }); // Inclure les non publiées pour le comptage admin
   const articles = await getAllArticles();
 

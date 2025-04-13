@@ -1,7 +1,8 @@
-// Retirer 'use client' pour en faire un Server Component
+export const revalidate = 0; // Désactiver la mise en cache des données
 import React from 'react';
 import { Playfair_Display } from 'next/font/google';
-import { prisma } from '@/lib/prisma';
+// Importer la fonction spécifique pour la grille publique
+import { getRecipesForGrid } from '@/lib/data/recipes';
 import RecipeGrid from '@/components/recipe/RecipeGrid';
 // Importer le nouveau composant client pour le titre
 import AnimatedPageTitle from '@/components/layout/AnimatedPageTitle';
@@ -17,25 +18,8 @@ const playfairDisplay = Playfair_Display({
 // Suppression des types locaux, des catégories mockées et des recettes mockées
 
 export default async function RecettesPage() { // Rendre async
-  // Récupérer toutes les recettes depuis Prisma
-  const recipes = await prisma.recipe.findMany({
-    orderBy: { createdAt: 'desc' },
-    // Sélectionner uniquement les champs existants dans le modèle Prisma Recipe
-    select: {
-      id: true,
-      title: true,
-      image: true,
-      slug: true, // Ajouter le slug
-      description: true, // Ajouter description
-      category: true,    // Ajouter category
-      // Les champs difficulty, prepTime, cookTime ne sont pas nécessaires pour la grille
-      // On pourrait sélectionner ingredients et steps si RecipeCard en avait besoin,
-      // mais ce n'est pas le cas actuellement.
-      // ingredients: true,
-      // steps: true,
-      createdAt: true, // Garder createdAt si nécessaire (ex: tri ou affichage)
-    }
-  });
+  // Récupérer les recettes publiées avec les champs spécifiques pour la grille
+  const recipes = await getRecipesForGrid();
 
   // La logique de filtrage et d'affichage sera dans RecipeGrid
   return (

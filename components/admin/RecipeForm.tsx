@@ -28,9 +28,11 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from "@/components/ui/switch"; // Importer Switch
+import { Label } from "@/components/ui/label"; // Importer Label
 import { PlusCircle, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
-import { useToast } from '@/hooks/use-toast'; // Restaurer chemin original
+import { useToast } from '@/hooks/use-toast';
 
 // Schéma pour un ingrédient individuel (adapté pour Prisma)
 const ingredientSchema = z.object({
@@ -62,6 +64,7 @@ const recipeFormSchema = z.object({
   image: z.union([z.string().url().optional(), z.any().optional()]), // Garder la logique image
   ingredients: z.array(ingredientSchema).min(1, { message: 'Ajoutez au moins un ingrédient.' }),
   steps: z.array(stepSchema).min(1, { message: 'Ajoutez au moins une étape.' }),
+  published: z.boolean(), // Rendre non-optionnel, defaultValues gère l'initialisation
 });
 
 // Le type inféré devrait maintenant correspondre plus directement
@@ -94,8 +97,9 @@ const defaultFormValues: RecipeFormValues = {
   category: '',
   image: undefined,
   // Adapter les valeurs par défaut pour quantity (nombre)
-  ingredients: [{ name: '', quantity: 1, unit: '' }], // Mettre une quantité par défaut
+  ingredients: [{ name: '', quantity: 1, unit: '' }],
   steps: [{ description: '', duration: undefined }],
+  published: false, // Valeur par défaut pour published
 };
 
 
@@ -168,7 +172,8 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
       // Envoyer les tableaux d'objets structurés sous forme de JSON stringifié
       formData.append('ingredients', JSON.stringify(data.ingredients));
       formData.append('steps', JSON.stringify(data.steps));
-
+formData.append('published', data.published.toString()); // Ajouter published à FormData
+formData.append('image', imageFile);
       formData.append('image', imageFile);
       if (isEditing && currentImageUrl) {
         formData.append('currentImageUrl', currentImageUrl);
@@ -302,6 +307,28 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Champ Published (Switch) */}
+              <FormField
+                control={control}
+                name="published"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm col-span-1 md:col-span-2 mt-4 md:mt-0">
+                    <div className="space-y-0.5">
+                      <FormLabel>Publier la recette</FormLabel>
+                      <FormDescription>
+                        Rendre cette recette visible publiquement.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />

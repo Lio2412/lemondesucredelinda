@@ -117,6 +117,7 @@ export async function PUT(
     let category: string | undefined;
     let ingredients: IngredientData[];
     let steps: StepData[];
+    let published: boolean = false; // Initialiser published
     let imageFile: File | undefined = undefined;
     let newImageUrl: string | undefined = undefined; // URL finale à sauvegarder
     let oldImageUrl: string | undefined = undefined; // URL actuelle si une nouvelle image est fournie
@@ -136,7 +137,8 @@ export async function PUT(
       const ingredientsStr = formData.get('ingredients') as string;
       const stepsStr = formData.get('steps') as string;
       const image = formData.get('image') as File | null;
-      oldImageUrl = formData.get('currentImageUrl') as string | undefined; // Récupérer l'URL actuelle
+      const publishedStr = formData.get('published') as string | null; // Récupérer published
+      oldImageUrl = formData.get('currentImageUrl') as string | undefined;
 
       if (!title || !slug || !basePortions || !ingredientsStr || !stepsStr) {
         return NextResponse.json({ error: 'Données FormData manquantes' }, { status: 400 });
@@ -148,6 +150,7 @@ export async function PUT(
       } catch (e) {
         return NextResponse.json({ error: 'Données ingrédients/étapes invalides', details: e }, { status: 400 });
       }
+      published = publishedStr === 'true'; // Convertir published
 
       if (image) {
         imageFile = image;
@@ -170,6 +173,7 @@ export async function PUT(
       category = jsonData.category;
       ingredients = z.array(ingredientSchema).min(1).parse(jsonData.ingredients);
       steps = z.array(stepSchema).min(1).parse(jsonData.steps);
+      published = typeof jsonData.published === 'boolean' ? jsonData.published : false; // Récupérer published du JSON
       // Si image est une string dans JSON, c'est l'URL actuelle (ou une nouvelle si on change via URL)
       if (typeof jsonData.image === 'string') {
         newImageUrl = jsonData.image;
@@ -246,7 +250,8 @@ export async function PUT(
           cookTime,
           basePortions,
           category,
-          image: newImageUrl, // Utiliser la nouvelle URL ou l'ancienne conservée
+          image: newImageUrl,
+          published, // Ajouter published aux données Prisma
         },
       });
 

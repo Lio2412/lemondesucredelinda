@@ -9,9 +9,10 @@ export type RecipeWithStepCount = Pick<Recipe, 'id' | 'title' | 'createdAt'> & {
   };
 };
 
-export const getAllRecipes = async (): Promise<RecipeWithStepCount[]> => {
+export const getAllRecipes = async ({ includeUnpublished = false }: { includeUnpublished?: boolean } = {}): Promise<RecipeWithStepCount[]> => {
   try {
     const recipes = await prisma.recipe.findMany({
+      where: includeUnpublished ? undefined : { published: true }, // Filtrer si includeUnpublished est false
       select: {
         id: true,
         title: true,
@@ -24,8 +25,7 @@ export const getAllRecipes = async (): Promise<RecipeWithStepCount[]> => {
         createdAt: 'desc',
       },
     });
-    // Le type retourné correspond maintenant à RecipeWithStepCount[]
-    return recipes;
+    return recipes; // Le type retourné correspond toujours à RecipeWithStepCount[]
   } catch (error) {
     console.error("Erreur lors de la récupération des recettes:", error);
     throw new Error("Impossible de récupérer les recettes.");
@@ -65,6 +65,35 @@ export const getRecipeBySlug = async (slug: string) => { // Le type retourné es
     return null;
   }
 };
+
+// Fonction pour récupérer les recettes publiées avec les champs nécessaires pour la grille publique
+export const getRecipesForGrid = async () => {
+  try {
+    const recipes = await prisma.recipe.findMany({
+      where: {
+        published: true, // Filtrer par recettes publiées
+      },
+      select: { // Sélectionner les champs nécessaires pour RecipeGrid
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        image: true,
+        category: true,
+        createdAt: true, // Garder createdAt si RecipeGrid l'utilise pour le tri/affichage
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    // Le type retourné correspondra à ce que RecipeGrid attend (implicitement)
+    return recipes;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des recettes pour la grille:", error);
+    throw new Error("Impossible de récupérer les recettes pour la grille.");
+  }
+};
+
 
 // Les données mockées sont supprimées.
 

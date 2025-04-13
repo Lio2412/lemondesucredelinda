@@ -11,7 +11,7 @@ import RecipesTable from "@/components/admin/RecipesTable";
 
 export default async function AdminRecipesPage() {
   // Récupérer les recettes via la fonction dédiée
-  const recipes = await getAllRecipes(); // Contient maintenant id, title, createdAt, _count: { steps }
+  const recipes = await getAllRecipes({ includeUnpublished: true }); // Afficher toutes les recettes (publiées ou non)
 
   return (
     <div className="container mx-auto py-10">
