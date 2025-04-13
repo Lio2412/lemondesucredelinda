@@ -8,16 +8,21 @@ import type { Creation } from '@prisma/client'; // Utiliser le type Prisma
 
 
 // Fonction pour récupérer toutes les créations depuis la BDD
-export const getAllCreations = async (): Promise<Creation[]> => {
+// Accepte un paramètre optionnel pour inclure les non publiées (utile pour l'admin)
+export const getAllCreations = async (options?: { includeUnpublished?: boolean }): Promise<Creation[]> => {
+  const includeUnpublished = options?.includeUnpublished ?? false;
+
   try {
     // Ajouter un log pour debug
-    console.log("Tentative de connexion à la base de données avec l'URL:", 
-      process.env.DATABASE_URL ? 
+    console.log("Tentative de connexion à la base de données avec l'URL:",
+      process.env.DATABASE_URL ?
       `${process.env.DATABASE_URL.substring(0, 20)}...` : // Masquer les détails sensibles
       "DATABASE_URL non définie");
     
+    const whereClause = includeUnpublished ? {} : { published: true };
+
     const creations = await prisma.creation.findMany({
-      where: { published: true },
+      where: whereClause, // Utiliser la clause where dynamique
       orderBy: {
         createdAt: 'desc', // Optionnel: trier par défaut
       },

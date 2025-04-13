@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminCreationsPage() { // Rendre async
   // Récupérer les données depuis la base de données
-  const creations = await getAllCreations();
+  const creations = await getAllCreations({ includeUnpublished: true }); // Inclure les non publiées pour l'admin
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
