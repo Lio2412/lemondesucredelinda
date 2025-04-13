@@ -67,3 +67,33 @@ export const getRecipeBySlug = async (slug: string) => { // Le type retourné es
 };
 
 // Les données mockées sont supprimées.
+
+// Fonction pour récupérer les N dernières recettes publiées pour la page d'accueil
+export const getPublishedRecipes = async (limit: number = 3) => {
+  try {
+    const recipes = await prisma.recipe.findMany({
+      where: {
+        published: true, // Filtrer par recettes publiées
+      },
+      take: limit, // Limiter le nombre de résultats
+      orderBy: {
+        createdAt: 'desc', // Trier par date de création décroissante
+      },
+      select: { // Sélectionner les champs nécessaires pour l'affichage
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        image: true, // Utiliser 'image' comme défini dans le schéma
+        category: true,
+        difficulty: true,
+        prepTime: true, // Utiliser prepTime et cookTime
+        cookTime: true,
+      },
+    });
+    return recipes;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des recettes publiées:", error);
+    throw new Error("Impossible de récupérer les recettes publiées.");
+  }
+};

@@ -82,6 +82,8 @@ model Recipe {
   ingredients Ingredient[] // Relation vers les ingrédients
   steps       RecipeStep[] // Relation vers les étapes
 
+  published    Boolean      @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

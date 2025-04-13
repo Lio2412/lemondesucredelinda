@@ -40,10 +40,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   // Restauré pour accepter URL (string) ou File
   imageUrl: z.string().url({ message: "Veuillez entrer une URL d'image valide." }).optional().or(z.any()),
-  // Champ date restauré
-  creationDate: z.date({
-    required_error: 'Une date de création est requise.',
-  }),
+  // Le champ creationDate est supprimé car il n'existe pas dans le modèle Prisma
 });
 
 type CreationFormValues = z.infer<typeof formSchema>;
@@ -72,7 +69,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       title: initialData?.title || '',
       description: initialData?.description || '',
       imageUrl: initialData?.imageUrl || undefined, // Restauré pour type file/string
-      creationDate: initialData?.creationDate || new Date(), // Restauré
+      // creationDate supprimé des valeurs par défaut
     },
   });
 
@@ -288,50 +285,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
         />
 
 
-        {/* Champ Date restauré */}
-        <FormField
-          control={form.control}
-          name="creationDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date de création *</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-[240px] pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                      disabled={isSubmitting}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP', { locale: fr })
-                      ) : (
-                        <span>Choisir une date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-background border shadow-md" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date: Date) =>
-                      date > new Date() || date < new Date('1900-01-01') || isSubmitting
-                    }
-                    initialFocus
-                    locale={fr} // Calendrier en français
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Le champ Date a été supprimé car il n'existe pas dans le modèle Prisma */}
         <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto"> {/* Ajustement largeur bouton */}
           {/* Texte bouton restauré */}
           {isSubmitting ? (creationId ? 'Mise à jour...' : 'Enregistrement...') : (creationId ? '💾 Enregistrer les modifications' : 'Créer la création')}

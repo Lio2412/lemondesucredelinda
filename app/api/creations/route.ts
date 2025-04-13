@@ -78,7 +78,9 @@ export async function POST(req: Request) {
         title: title,
         description: description, // Utiliser la description vérifiée
         image: imageUrl,         // Utiliser l'URL de l'image uploadée ou null
+        // 'published', 'createdAt', 'updatedAt' utiliseront les valeurs par défaut définies dans le schéma
       },
+      // Pas besoin de select ici, Prisma retourne tous les champs scalaires par défaut
     });
 
     return NextResponse.json(creation);

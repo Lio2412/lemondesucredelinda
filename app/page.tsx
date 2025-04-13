@@ -10,6 +10,7 @@ import { Playfair_Display } from 'next/font/google';
 import LastCreations from '@/components/creations/LastCreations';
 import HeroSection from '@/components/home/HeroSection'; // Importer le nouveau composant client
 import { getLastCreations } from '@/lib/data/creations'; // Importer la fonction de récupération des données
+import { getPublishedRecipes } from '@/lib/data/recipes'; // Importer la fonction pour les recettes publiées
 
 // Instancier la police Playfair Display
 const playfairDisplay = Playfair_Display({
@@ -18,24 +19,8 @@ const playfairDisplay = Playfair_Display({
   display: 'swap',
 });
 
-// Interface pour les recettes (peut être déplacée dans @/types plus tard)
-interface Recipe {
-  id: number;
-  title: string;
-  description: string;
-  mainImage: string;
-  category: string;
-  difficulty: string;
-  time: string;
-  slug: string; // Ajouté pour le lien
-}
-
-// Données mockées pour les recettes en vedette (chemins d'images mis à jour)
-const featuredRecipes: Recipe[] = [
-  { id: 1, title: "Tarte au Citron Meringuée", description: "Un classique revisité avec une meringue aérienne.", mainImage: "/images/recipes/tarte-citron-meringuee.jpg", category: "Tartes", difficulty: "Moyen", time: "1h30", slug: "tarte-au-citron-meringuee" },
-  { id: 2, title: "Gâteau Moelleux au Chocolat", description: "Intensément chocolaté et incroyablement fondant.", mainImage: "/images/recipes/gateau-chocolat.jpg", category: "Gâteaux", difficulty: "Facile", time: "1h", slug: "gateau-moelleux-au-chocolat" },
-  { id: 3, title: "Macarons à la Vanille", description: "La perfection délicate des coques et de la ganache.", mainImage: "/images/recipes/macarons-vanille.jpg", category: "Petits Gâteaux", difficulty: "Difficile", time: "2h", slug: "macarons-a-la-vanille" },
-];
+// L'interface Recipe locale et les données mockées featuredRecipes sont supprimées.
+// Nous utiliserons les données récupérées par getPublishedRecipes.
 
 
 
@@ -72,6 +57,7 @@ export const generateMetadata = (): Metadata => ({
 export default async function Home() {
   // Récupérer les données des dernières créations côté serveur
   const lastCreationsData = await getLastCreations(3);
+  const publishedRecipesData = await getPublishedRecipes(3); // Récupérer les recettes publiées
 
   return (
     <main className="min-h-screen bg-white">
@@ -93,41 +79,47 @@ export default async function Home() {
           </div>
           {/* Grille des recettes */}
           <div className="grid md:grid-cols-3 gap-8">
-            {featuredRecipes.map((recipe) => (
-              <article key={recipe.id} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <Link href={`/recettes/${recipe.slug}`}> {/* Utilisation du slug pour le lien */}
-                  <div className="aspect-video relative overflow-hidden">
-                    {/* Utilisation du composant Image standard pour l'instant */}
-                    <Image
-                      src={recipe.mainImage}
-                      alt={recipe.title}
-                      width={800}
-                      height={450}
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      // priority={recipe.id === 1} // Priority peut être ajouté si nécessaire
-                    />
-                    {/* Badge catégorie */}
-                    <div className="absolute top-0 right-0 bg-pink-600 text-white text-xs px-2 py-1 m-2 rounded"> {/* Ajustement couleur thème */}
-                      {recipe.category}
+            {publishedRecipesData.map((recipe) => {
+              // Calcul du temps total
+              const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
+              const hours = Math.floor(totalTime / 60);
+              const minutes = totalTime % 60;
+              const timeString = `${hours > 0 ? `${hours}h` : ''}${minutes > 0 ? `${minutes}min` : ''}` || 'N/A';
+
+              return (
+                <article key={recipe.id} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                  <Link href={`/recettes/${recipe.slug}`}>
+                    <div className="aspect-video relative overflow-hidden">
+                      <Image
+                        src={recipe.image || '/images/placeholder.png'} // Utiliser l'image de la recette ou un placeholder
+                        alt={recipe.title}
+                        width={800}
+                        height={450}
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                      {recipe.category && (
+                        <div className="absolute top-0 right-0 bg-pink-600 text-white text-xs px-2 py-1 m-2 rounded">
+                          {recipe.category}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div className="p-4">
-                    {/* Titre de la recette */}
-                    <h3 className={`text-xl mb-2 group-hover:text-pink-600 transition-colors ${playfairDisplay.className}`}> {/* Ajustement couleur thème */}
-                      {recipe.title}
-                    </h3>
-                    {/* Description courte */}
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{recipe.description}</p>
-                    {/* Informations (difficulté, temps) */}
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>{recipe.difficulty}</span>
-                      <span>{recipe.time}</span>
+                    <div className="p-4">
+                      <h3 className={`text-xl mb-2 group-hover:text-pink-600 transition-colors ${playfairDisplay.className}`}>
+                        {recipe.title}
+                      </h3>
+                      {recipe.description && (
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{recipe.description}</p>
+                      )}
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>{recipe.difficulty || 'N/A'}</span>
+                        <span>{timeString}</span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </article>
-            ))}
+                  </Link>
+                </article>
+              );
+            })}
           </div>
           {/* Bouton pour voir toutes les recettes */}
           <div className="text-center mt-8">
