@@ -97,12 +97,11 @@ export default async function CreationPage({ params }: CreationPageProps) { // R
       <div className="container mx-auto px-4 py-12 md:py-16 pt-24 md:pt-32">
         <article className="max-w-3xl mx-auto">
           {image && ( // Afficher l'image seulement si elle existe
-            <div className="w-full aspect-video rounded-xl shadow-lg overflow-hidden mb-8 md:mb-12 relative">
+            <div className="w-full rounded-xl shadow-lg overflow-hidden mb-8 md:mb-12">
               <Image
                 src={image} // Utiliser 'image' sans cache-busting
                 alt={`Image de ${title}`}
-                fill
-                className="object-contain rounded-lg"
+                className="w-full h-auto object-contain rounded-lg"
                 sizes="(max-width: 768px) 100vw, 896px"
                 priority
               />
