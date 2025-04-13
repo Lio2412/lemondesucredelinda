@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     const title = formData.get('title') as string | null;
     const description = formData.get('description') as string | null;
     const imageFile = formData.get('image') as File | null;
+    const publishedString = formData.get('published') as string | null; // Récupérer published
 
     // Validation des champs texte
     if (!title) {
@@ -78,7 +79,8 @@ export async function POST(req: Request) {
         title: title,
         description: description, // Utiliser la description vérifiée
         image: imageUrl,         // Utiliser l'URL de l'image uploadée ou null
-        // 'published', 'createdAt', 'updatedAt' utiliseront les valeurs par défaut définies dans le schéma
+        published: publishedString === 'true', // Convertir en booléen et inclure
+        // 'createdAt', 'updatedAt' utiliseront les valeurs par défaut définies dans le schéma
       },
       // Pas besoin de select ici, Prisma retourne tous les champs scalaires par défaut
     });

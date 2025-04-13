@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox'; // Remplacer Switch par Checkbox
+import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -41,6 +43,7 @@ const formSchema = z.object({
   // Restauré pour accepter URL (string) ou File
   imageUrl: z.string().url({ message: "Veuillez entrer une URL d'image valide." }).optional().or(z.any()),
   // Le champ creationDate est supprimé car il n'existe pas dans le modèle Prisma
+  published: z.boolean().optional(), // Ajout du champ published
 });
 
 type CreationFormValues = z.infer<typeof formSchema>;
@@ -70,6 +73,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       description: initialData?.description || '',
       imageUrl: initialData?.imageUrl || undefined, // Restauré pour type file/string
       // creationDate supprimé des valeurs par défaut
+      published: initialData?.published || false, // Ajout de la valeur par défaut pour published
     },
   });
 
@@ -104,6 +108,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
           formData.append('title', values.title);
           formData.append('description', values.description || "");
           formData.append('image', values.imageUrl, values.imageUrl.name);
+          formData.append('published', String(values.published ?? false)); // Ajouter published pour PUT avec FormData
           // Note: La date n'est pas envoyée ici, l'API PUT devra l'ignorer ou la gérer si nécessaire
 
           response = await fetch(endpoint, {
@@ -115,6 +120,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
           const payload = {
             title: values.title,
             description: values.description,
+            published: values.published ?? false, // Ajouter published pour PUT avec JSON
             // Ne pas inclure 'image' ici pour ne pas écraser l'existante par erreur
           };
           response = await fetch(endpoint, {
@@ -138,6 +144,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
         if (values.imageUrl instanceof File) {
           formData.append('image', values.imageUrl, values.imageUrl.name);
         }
+        formData.append('published', String(values.published ?? false)); // Ajouter published pour POST avec FormData
         // Si imageUrl est une string (URL), l'API actuelle ne la gère pas via FormData.
         // L'utilisateur doit utiliser le champ 'Choisir une image' pour uploader.
 
@@ -280,6 +287,34 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
                 {/* <Input type="url" placeholder="Ou collez une URL ici..." onChange={(e) => { field.onChange(e.target.value); setImagePreview(e.target.value); }} value={typeof field.value === 'string' ? field.value : ''} className="mt-2" disabled={isSubmitting}/> */}
               </FormDescription>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="published"
+          render={({ field }) => (
+            // Adapter la structure pour Checkbox (label à côté)
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isSubmitting}
+                  aria-readonly={isSubmitting}
+                  id="published" // Ajouter un id pour le label
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <Label htmlFor="published" className="text-base"> {/* Utiliser htmlFor */}
+                  Publier
+                </Label>
+                <FormDescription>
+                  Rendre cette création visible sur le site public.
+                </FormDescription>
+              </div>
+              <FormMessage /> {/* Déplacer FormMessage ici pour être cohérent */}
             </FormItem>
           )}
         />

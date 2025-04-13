@@ -55,6 +55,7 @@ export async function PUT(
   // Variables pour les données et l'image
   let title: string | null = null;
   let description: string | null = null;
+  let published: boolean | undefined = undefined; // Variable pour stocker la valeur booléenne
   let imageFile: File | null = null;
   let newImageUrl: string | null = null;
   let dataToUpdate: Prisma.CreationUpdateInput = {}; // Initialiser l'objet de mise à jour
@@ -85,10 +86,13 @@ export async function PUT(
       title = formData.get('title') as string | null;
       description = formData.get('description') as string | null;
       imageFile = formData.get('image') as File | null;
+      const publishedString = formData.get('published') as string | null; // Lire depuis FormData
+      published = publishedString === 'true'; // Convertir en booléen
     } else if (contentType?.includes('application/json')) {
       const jsonData = await req.json();
       title = jsonData.title;
       description = jsonData.description;
+      published = jsonData.published; // Lire depuis JSON (devrait être booléen)
       // Pas d'imageFile dans ce cas
     } else {
       return NextResponse.json({ error: 'Type de contenu non supporté' }, { status: 415 });
@@ -106,6 +110,10 @@ export async function PUT(
     // Ajouter title et description aux données à mettre à jour
     dataToUpdate.title = title;
     dataToUpdate.description = description;
+    // Ajouter published à dataToUpdate s'il a été défini
+    if (published !== undefined) {
+      dataToUpdate.published = published;
+    }
 
     let oldImageUrl: string | null = null;
 
