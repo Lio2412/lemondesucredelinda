@@ -1,3 +1,4 @@
+export const revalidate = 0; // Désactiver la mise en cache des données pour la page d'accueil
 // 'use client'; // Retiré pour transformer en Server Component
 
 import type { Metadata } from 'next';

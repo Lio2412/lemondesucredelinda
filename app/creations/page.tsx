@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic'; // Force le rendu SSR à chaque requête
+export const revalidate = 0; // Désactiver la mise en cache des données
 // Ce composant redevient un Server Component
 
 import { getAllCreations } from '@/lib/data/creations'; // Importer la fonction de récupération
