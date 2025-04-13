@@ -1,3 +1,4 @@
+export const revalidate = 0; // Désactiver la mise en cache des données pour le dashboard
 import Link from 'next/link';
 import {
   Card,
