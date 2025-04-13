@@ -102,7 +102,7 @@ export default async function CreationPage({ params }: CreationPageProps) { // R
                 src={image} // Utiliser 'image' sans cache-busting
                 alt={`Image de ${title}`}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="(max-width: 768px) 100vw, 896px"
                 priority
               />
