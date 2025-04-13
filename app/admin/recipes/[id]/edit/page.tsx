@@ -23,6 +23,7 @@ const transformDataForForm = (
     basePortions: recipeData.basePortions,
     category: recipeData.category ?? '',
     image: recipeData.image ?? undefined,
+    published: recipeData.published, // Ajout du statut publié
     // Transformer les objets Ingredient
     ingredients: recipeData.ingredients.map((ing: Ingredient) => ({
       name: ing.name,
