@@ -1,8 +1,6 @@
 # Contexte Actif
 
-Travail actuel : Finalisation de la mise à jour de la documentation suite à l'amélioration de l'historique des newsletters (ajout recipientCount).
-Mise à jour du SSR sur les pages de créations pour garantir la propagation instantanée des modifications sur le site public.
-
+Travail actuel : Mise à jour de la documentation (Memory Bank, README) suite à l'implémentation de la logique de publication pour les Créations et Recettes. Tâche terminée.
 Changements récents :
 - **Finalisation Pages Légales :** Création, mise à jour du contenu, style, SEO et ajout des liens dans le footer pour les pages "Mentions Légales" et "Politique de Confidentialité".
 - **Implémentation Newsletter :**
@@ -169,10 +167,13 @@ Changements récents :
     - Les pages `app/creations/page.tsx` et `app/creations/[id]/page.tsx` forcent désormais le Server Side Rendering (SSR).
     - Objectif : garantir que toute modification d’une création (ajout, édition, suppression) soit immédiatement visible sur le site public, sans délai de propagation lié au cache ISR/SSG.
     - Changement poussé sur la branche principale.
-
+- **Implémentation Logique de Publication (Créations & Recettes) :**
+    - Ajout d'un champ booléen `published` aux modèles Prisma `Creation` et `Recipe`.
+    - Mise à jour des fonctions d'accès aux données (`lib/data/creations.ts`, `lib/data/recipes.ts`) pour filtrer les éléments non publiés sur les pages publiques (`/creations`, `/recettes`, `/creations/[id]`, `/recettes/[slug]`). Les pages admin continuent d'afficher tous les éléments.
+    - Ajout d'un interrupteur "Publié" dans les formulaires d'administration (`CreationForm.tsx`, `RecipeForm.tsx`).
+    - Mise à jour des routes API correspondantes (POST et PUT) pour gérer le champ `published`.
+    - Désactivation explicite du cache (`revalidate = 0`) sur les pages publiques concernées pour assurer la visibilité immédiate des changements de statut de publication.
+    - **Note :** Les Articles conservent leur logique de publication basée sur `publishedAt`.
 
 Prochaines étapes :
-- Remplacer l'authentification mockée par une solution robuste (ex: NextAuth.js).
-- Vérifier/Adapter la gestion des slugs pour Articles et Créations si nécessaire.
-- Ajouter la gestion des catégories/tags pour les articles dans le formulaire et l'API.
-- Vérifier/Adapter les slugs (actuellement non gérés ou utilisant l'ID).
+- Attente de nouvelles instructions.

@@ -7,6 +7,7 @@
         - **CRUD Admin :** Formulaire (`RecipeForm`) gère tous les champs et l'upload d'image. API (POST/PUT/DELETE) gèrent la structure relationnelle et le stockage/suppression d'images (Supabase). Page d'édition pré-remplit correctement. Liste (`/admin/recipes`) affiche le compte des étapes.
         - **Affichage Public :** Page liste (`/recettes`) utilise le `slug` pour les liens. Page détail (`/recettes/[slug]`) affiche les données structurées.
         - **Mode Cuisine :** Fonctionnel avec les données structurées.
+        - **Logique de Publication :** Ajout d'un champ `published` (booléen) pour contrôler la visibilité publique. Les pages publiques filtrent les éléments non publiés, l'admin voit tout. Contrôle via interrupteur dans le formulaire admin.
     - **Gestion des Créations connectée à la BDD via Prisma :**
         - Liste (`/admin/creations`), ajout (`/admin/creations/new`), modification (`/admin/creations/[id]/edit`).
         - Affichage public (`/creations`, `/creations/[id]`).
@@ -15,6 +16,7 @@
         - **Pages `/creations` et `/creations/[id]` :**
             - Forçage du Server Side Rendering (SSR) pour garantir la propagation instantanée de toute modification (ajout, édition, suppression) sur le site public, sans délai lié au cache.
         - Script de seeding `prisma/seed.ts` pour les données initiales.
+        - **Logique de Publication :** Ajout d'un champ `published` (booléen) pour contrôler la visibilité publique. Les pages publiques filtrent les éléments non publiés, l'admin voit tout. Contrôle via interrupteur dans le formulaire admin.
     - Installation et configuration de `date-fns`, `react-day-picker`, `Popover`, `Toast`.
     - **Gestion des Articles connectée à la BDD via Prisma :**
         - Liste (`/admin/articles`), ajout (`/admin/articles/new`), modification (`/admin/articles/[id]/edit`), suppression.

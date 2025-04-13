@@ -36,3 +36,15 @@ Le formulaire de contact utilise également le champ `replyTo` avec l'adresse em
 Pour garantir la fraîcheur des données et la propagation instantanée de toute modification (ajout, édition, suppression) sur le site public, les pages `app/creations/page.tsx` et `app/creations/[id]/page.tsx` forcent le Server Side Rendering (SSR).
 Ce choix désactive le cache ISR/SSG pour ces pages, assurant que chaque requête affiche l’état le plus à jour des créations, sans délai de propagation.
 Cette stratégie a été adoptée suite à des besoins de cohérence immédiate entre l’interface d’administration et le site public.
+
+
+## Pattern de Publication (Créations & Recettes)
+
+Pour les modèles `Creation` et `Recipe`, la visibilité publique est contrôlée par un champ booléen `published` dans le schéma Prisma.
+
+- **Accès aux Données :** Les fonctions d'accès aux données (`lib/data/creations.ts`, `lib/data/recipes.ts`) filtrent les résultats pour les pages publiques (`/creations`, `/recettes`, etc.), ne retournant que les éléments où `published` est `true`. Les pages d'administration (`/admin/*`) récupèrent tous les éléments, quel que soit leur statut de publication.
+- **Interface Admin :** Les formulaires d'administration (`CreationForm.tsx`, `RecipeForm.tsx`) incluent un interrupteur (Switch) permettant à l'administrateur de définir l'état `published`.
+- **API :** Les routes API correspondantes (POST pour la création, PUT pour la mise à jour) ont été modifiées pour accepter et enregistrer la valeur du champ `published`.
+- **Cache :** Pour assurer que les changements de statut de publication soient immédiatement visibles, le cache est explicitement désactivé (`revalidate = 0`) sur les pages publiques listant ou affichant les Créations et Recettes.
+
+**Différence avec les Articles :** Ce pattern diffère de celui utilisé pour les `Article`, qui utilisent un champ `publishedAt` (DateTime) pour déterminer la visibilité (un article est considéré comme publié si `publishedAt` est défini et est dans le passé).
