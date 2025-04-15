@@ -15,7 +15,6 @@ const transformDataForForm = (
 ): RecipeFormValues => {
   return {
     title: recipeData.title,
-    slug: recipeData.slug,
     description: recipeData.description ?? '',
     difficulty: recipeData.difficulty ?? '',
     prepTime: recipeData.prepTime ?? undefined,
