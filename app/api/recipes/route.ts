@@ -140,6 +140,8 @@ export async function POST(req: Request) {
     // --- Fin Gestion de l'upload d'image ---
 
     // Utiliser une transaction Prisma pour créer la recette et ses relations
+    // Force update check
+
     const newRecipe = await prisma.$transaction(async (tx) => {
       const createdRecipe = await tx.recipe.create({
         data: {

@@ -70,7 +70,6 @@ enum RecipeCategory {
 model Recipe {
   id           String       @id @default(cuid())
   title        String
-  slug         String       @unique
   description  String?
   image        String?
   difficulty   String?
