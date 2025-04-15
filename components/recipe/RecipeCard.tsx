@@ -2,17 +2,19 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Clock, BarChart } from 'lucide-react'; // Icônes pour temps/difficulté
+import type { RecipeCategory } from '@prisma/client'; // Importer RecipeCategory
 
 // Interface pour les props du composant RecipeCard
 interface RecipeCardProps {
+  id: string; // Ajout de l'ID
   title: string;
-  slug: string;
+  // slug: string; // Supprimé
   image: string;
   description?: string; // Ajouté pour plus de détails
   difficulty?: string;
   prepTime?: number;
   cookTime?: number;
-  category?: string; // Ajouté pour le badge
+  category?: RecipeCategory; // Type mis à jour vers l'enum
 }
 
 // Police Playfair Display (peut être importée globalement ou ici si nécessaire)
@@ -24,8 +26,9 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({
+  id, // Ajout de l'ID
   title,
-  slug,
+  // slug, // Supprimé
   image,
   description,
   difficulty,
@@ -37,7 +40,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
 
   return (
     <article className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 border dark:border-gray-700">
-      <Link href={`/recettes/${slug}`} className="block">
+      {/* Mettre à jour le lien pour utiliser l'ID */}
+      <Link href={`/recettes/${id}`} className="block">
         <div className="aspect-video relative overflow-hidden">
           <Image
             src={image}

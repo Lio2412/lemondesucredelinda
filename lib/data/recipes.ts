@@ -49,22 +49,6 @@ export const getRecipeById = async (id: string) => { // Le type retourné est in
   }
 };
 
-// Fonction pour récupérer une recette par son SLUG depuis Prisma, incluant ingrédients et étapes
-export const getRecipeBySlug = async (slug: string) => { // Le type retourné est inféré
-  try {
-    const recipe = await prisma.recipe.findUnique({
-      where: { slug },
-      include: {
-        ingredients: { orderBy: { id: 'asc' } },
-        steps: { orderBy: { order: 'asc' } },
-      },
-    });
-    return recipe;
-  } catch (error) {
-    console.error(`Erreur lors de la récupération de la recette par slug ${slug}:`, error);
-    return null;
-  }
-};
 
 // Fonction pour récupérer les recettes publiées avec les champs nécessaires pour la grille publique
 export const getRecipesForGrid = async () => {
@@ -76,7 +60,7 @@ export const getRecipesForGrid = async () => {
       select: { // Sélectionner les champs nécessaires pour RecipeGrid
         id: true,
         title: true,
-        slug: true,
+        // slug: true, // Supprimé car n'existe plus
         description: true,
         image: true,
         category: true,
@@ -111,7 +95,7 @@ export const getPublishedRecipes = async (limit: number = 3) => {
       select: { // Sélectionner les champs nécessaires pour l'affichage
         id: true,
         title: true,
-        slug: true,
+        // slug: true, // Supprimé car n'existe plus
         description: true,
         image: true, // Utiliser 'image' comme défini dans le schéma
         category: true,

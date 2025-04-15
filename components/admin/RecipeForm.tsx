@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray, SubmitHandler, FieldValues, Control } from 'react-hook-form';
 import * as z from 'zod';
+import { RecipeCategory } from '@prisma/client'; // Importer l'enum RecipeCategory
 import { cn } from '@/lib/utils'; // Importer cn pour le bouton stylisé
 
 import { Button } from '@/components/ui/button';
@@ -54,13 +55,16 @@ const stepSchema = z.object({
 // Schéma de validation Zod mis à jour pour correspondre au modèle Prisma
 const recipeFormSchema = z.object({
   title: z.string().min(3, { message: 'Le titre doit contenir au moins 3 caractères.' }),
-  slug: z.string().min(3, { message: 'Le slug doit contenir au moins 3 caractères.' }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'Slug invalide (lettres minuscules, chiffres, tirets).' }),
+  // slug: z.string().min(3, { message: 'Le slug doit contenir au moins 3 caractères.' }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'Slug invalide (lettres minuscules, chiffres, tirets).' }), // Supprimé
   description: z.string().optional(),
   difficulty: z.string().optional(), // Pourrait être un enum plus tard
   prepTime: z.coerce.number().int().nonnegative().optional(), // Temps en minutes
   cookTime: z.coerce.number().int().nonnegative().optional(), // Temps en minutes
   basePortions: z.coerce.number().int().positive({ message: 'Le nombre de portions doit être positif.' }),
-  category: z.string().optional(), // Catégorie optionnelle
+  category: z.nativeEnum(RecipeCategory, { // Utiliser l'enum Prisma, rendre requis
+    required_error: "La catégorie est requise.",
+    invalid_type_error: "Catégorie invalide.",
+  }),
   image: z.union([z.string().url().optional(), z.any().optional()]), // Garder la logique image
   ingredients: z.array(ingredientSchema).min(1, { message: 'Ajoutez au moins un ingrédient.' }),
   steps: z.array(stepSchema).min(1, { message: 'Ajoutez au moins une étape.' }),
@@ -70,15 +74,7 @@ const recipeFormSchema = z.object({
 // Le type inféré devrait maintenant correspondre plus directement
 export type RecipeFormValues = z.infer<typeof recipeFormSchema>;
 
-// Mock data pour les catégories
-const categories = [
-  { value: 'entremet', label: 'Entremet' },
-  { value: 'tarte', label: 'Tarte' },
-  { value: 'biscuit', label: 'Biscuit' },
-  { value: 'gateau_voyage', label: 'Gâteau de voyage' },
-  { value: 'viennoiserie', label: 'Viennoiserie' },
-  { value: 'confiserie', label: 'Confiserie' },
-];
+// La liste mockée des catégories est supprimée, nous utiliserons l'enum RecipeCategory
 
 interface RecipeFormProps {
   initialData?: RecipeFormValues | null;
@@ -86,15 +82,16 @@ interface RecipeFormProps {
 }
 
 // Définir les valeurs par défaut pour un nouveau formulaire (mis à jour)
+// Utiliser la première valeur de l'enum comme défaut, ou une valeur spécifique si plus logique
 const defaultFormValues: RecipeFormValues = {
   title: '',
-  slug: '',
+  // slug: '', // Supprimé
   description: '',
   difficulty: '',
   prepTime: undefined,
   cookTime: undefined,
   basePortions: 4, // Garder une valeur par défaut raisonnable
-  category: '',
+  category: Object.values(RecipeCategory)[0], // Utiliser la première valeur de l'enum
   image: undefined,
   // Adapter les valeurs par défaut pour quantity (nombre)
   ingredients: [{ name: '', quantity: 1, unit: '' }],
@@ -161,7 +158,7 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
       // Si une nouvelle image est fournie, utiliser FormData
       const formData = new FormData();
       formData.append('title', data.title);
-      formData.append('slug', data.slug);
+      // formData.append('slug', data.slug); // Supprimé
       if (data.description) formData.append('description', data.description);
       if (data.difficulty) formData.append('difficulty', data.difficulty);
       if (data.prepTime !== undefined) formData.append('prepTime', data.prepTime.toString());
@@ -299,9 +296,11 @@ formData.append('image', imageFile);
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background border shadow-md">
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
+                        {/* Itérer sur les valeurs de l'enum RecipeCategory */}
+                        {Object.values(RecipeCategory).map((categoryValue) => (
+                          <SelectItem key={categoryValue} value={categoryValue}>
+                            {/* Afficher la valeur de l'enum comme label (peut être amélioré plus tard) */}
+                            {categoryValue}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -333,23 +332,7 @@ formData.append('image', imageFile);
                 )}
               />
             </div>
-            {/* Slug */}
-            <FormField
-              control={control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Slug *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: tarte-aux-pommes-classique" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Identifiant unique pour l'URL (minuscules, chiffres, tirets).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Slug supprimé */}
             {/* Description */}
             <FormField
               control={control}

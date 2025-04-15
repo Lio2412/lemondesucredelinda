@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { Clock, BarChart, Users, Soup, ListOrdered, ChefHat } from 'lucide-react'; // Réimporter ChefHat
 import { Playfair_Display } from 'next/font/google';
-import { getRecipeBySlug } from '@/lib/data/recipes'; // Utiliser getRecipeBySlug
+import { getRecipeById } from '@/lib/data/recipes'; // Utiliser getRecipeById
 import { Recipe, Ingredient, RecipeStep } from '@prisma/client'; // Importer les types Prisma
 import { Button } from '@/components/ui/button';
 import { CookingModeWrapper } from '@/components/recipe/CookingModeWrapper'; // Importer le wrapper client
@@ -18,13 +18,13 @@ const playfairDisplay = Playfair_Display({
 
 // Interface pour les props de la page, incluant les relations chargées
 interface RecipePageProps {
-  params: { slug: string };
+  params: { id: string }; // Utiliser id
 }
 
 
 // Type pour les props de generateMetadata
 type Props = {
-  params: { slug: string };
+  params: { id: string }; // Utiliser id
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
@@ -33,8 +33,8 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const slug = params.slug;
-  const recipe = await getRecipeBySlug(slug);
+  const id = params.id; // Utiliser id
+  const recipe = await getRecipeById(id); // Utiliser getRecipeById
 
   if (!recipe) {
     return {
@@ -81,10 +81,10 @@ export async function generateMetadata(
 
 // Le composant est un Server Component (async)
 export default async function RecettePage({ params }: RecipePageProps) {
-  const { slug } = params;
+  const { id } = params; // Utiliser id
 
-  // Récupérer la recette par slug, incluant ingrédients et étapes
-  const recipe = await getRecipeBySlug(slug);
+  // Récupérer la recette par id, incluant ingrédients et étapes
+  const recipe = await getRecipeById(id); // Utiliser getRecipeById
 
   // Si la recette n'est pas trouvée, afficher la page 404
   if (!recipe) {

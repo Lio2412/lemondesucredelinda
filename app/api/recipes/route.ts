@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod'; // Importer Zod pour parser les données
+import { RecipeCategory } from '@prisma/client'; // Importer l'enum RecipeCategory
 
 // Nom du bucket Supabase Storage
 const BUCKET_NAME = 'images';
@@ -27,13 +28,13 @@ export async function POST(req: Request) {
 
   try {
     let title: string;
-    let slug: string;
+    // let slug: string; // Supprimé
     let description: string | undefined;
     let difficulty: string | undefined;
     let prepTime: number | undefined;
     let cookTime: number | undefined;
     let basePortions: number;
-    let category: string | undefined;
+    let category: RecipeCategory; // Type mis à jour vers l'enum (requis par le formulaire)
     let ingredients: IngredientData[];
     let steps: StepData[];
     let published: boolean = false; // Initialiser published
@@ -45,21 +46,29 @@ export async function POST(req: Request) {
     if (contentType?.includes('multipart/form-data')) {
       const formData = await req.formData();
       title = formData.get('title') as string;
-      slug = formData.get('slug') as string;
+      // slug = formData.get('slug') as string; // Supprimé
       description = formData.get('description') as string | undefined;
       difficulty = formData.get('difficulty') as string | undefined;
       prepTime = formData.get('prepTime') ? parseInt(formData.get('prepTime') as string, 10) : undefined;
       cookTime = formData.get('cookTime') ? parseInt(formData.get('cookTime') as string, 10) : undefined;
       basePortions = parseInt(formData.get('basePortions') as string, 10);
-      category = formData.get('category') as string | undefined;
+      const categoryStr = formData.get('category') as string | null; // Lire comme string
       const ingredientsStr = formData.get('ingredients') as string;
       const stepsStr = formData.get('steps') as string;
       const publishedStr = formData.get('published') as string | null; // Récupérer published
       const image = formData.get('image') as File | null;
 
-      if (!title || !slug || !basePortions || !ingredientsStr || !stepsStr) {
-        return NextResponse.json({ error: 'Données FormData manquantes' }, { status: 400 });
+      // Vérifier les champs requis (slug supprimé)
+      if (!title || !basePortions || !categoryStr || !ingredientsStr || !stepsStr) {
+        return NextResponse.json({ error: 'Données FormData manquantes ou invalides' }, { status: 400 });
       }
+
+      // Valider la catégorie reçue contre l'enum
+      const categoryValidation = z.nativeEnum(RecipeCategory).safeParse(categoryStr);
+      if (!categoryValidation.success) {
+        return NextResponse.json({ error: 'Catégorie invalide', details: categoryValidation.error }, { status: 400 });
+      }
+      category = categoryValidation.data; // Assigner la valeur validée de l'enum
 
       // Parser et valider les ingrédients/étapes JSON stringifiés
       try {
@@ -77,15 +86,20 @@ export async function POST(req: Request) {
 
     } else if (contentType?.includes('application/json')) {
       const jsonData = await req.json();
-      // Valider toutes les données JSON avec un schéma global si nécessaire
+      // Valider toutes les données JSON avec un schéma global si nécessaire (ou individuellement)
       title = jsonData.title;
-      slug = jsonData.slug;
+      // slug = jsonData.slug; // Supprimé
       description = jsonData.description;
       difficulty = jsonData.difficulty;
       prepTime = jsonData.prepTime;
       cookTime = jsonData.cookTime;
       basePortions = jsonData.basePortions;
-      category = jsonData.category;
+      // Valider la catégorie reçue contre l'enum
+      const categoryValidationJson = z.nativeEnum(RecipeCategory).safeParse(jsonData.category);
+       if (!categoryValidationJson.success) {
+        return NextResponse.json({ error: 'Catégorie invalide', details: categoryValidationJson.error }, { status: 400 });
+      }
+      category = categoryValidationJson.data; // Assigner la valeur validée de l'enum
       ingredients = z.array(ingredientSchema).min(1).parse(jsonData.ingredients); // Valider
       steps = z.array(stepSchema).min(1).parse(jsonData.steps); // Valider
       published = typeof jsonData.published === 'boolean' ? jsonData.published : false; // Récupérer published du JSON
@@ -130,7 +144,6 @@ export async function POST(req: Request) {
       const createdRecipe = await tx.recipe.create({
         data: {
           title,
-          slug,
           description,
           difficulty,
           prepTime,
@@ -180,11 +193,8 @@ export async function POST(req: Request) {
         statusCode = 400;
     } else if (error instanceof Error) {
         errorMessage = error.message;
-        // Gérer les erreurs Prisma spécifiques (ex: slug unique)
-        if ('code' in error && error.code === 'P2002' && 'meta' in error && typeof error.meta === 'object' && error.meta && 'target' in error.meta && Array.isArray(error.meta.target) && error.meta.target.includes('slug')) {
-            errorMessage = 'Ce slug est déjà utilisé.';
-            statusCode = 409; // Conflict
-        }
+        // La gestion d'erreur spécifique au slug unique n'est plus nécessaire
+        // if ('code' in error && error.code === 'P2002' && ...) { ... }
     }
 
     // TODO: Compensation: Supprimer l'image uploadée si la transaction échoue ?

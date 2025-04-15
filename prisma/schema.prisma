@@ -1,29 +1,24 @@
-datasource db {
-  provider = "postgresql"
-  // Assurez-vous que cette variable d'environnement pointe vers l'URL de connexion DIRECTE
-  // à votre base de données PostgreSQL Supabase (ex: postgresql://postgres:[YOUR-PASSWORD]@[AWS-REGION].pooler.supabase.com:5432/postgres)
-  // et non l'URL de l'API Supabase.
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Modèle User utilisé par NextAuth et l'adaptateur Supabase/Prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique // Email doit être non-nul pour CredentialsProvider
-  password      String    // Ajout du champ mot de passe
+  email         String    @unique
+  password      String
   emailVerified DateTime?
   image         String?
-  role          String    @default("admin") // Rôle par défaut pour les nouveaux utilisateurs
-  accounts      Account[]
-  sessions      Session[]
+  role          String    @default("admin")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  // Pas besoin de @@map("users") avec PrismaAdapter par défaut
+  accounts      Account[]
+  sessions      Session[]
 }
 
 model Account {
@@ -32,18 +27,16 @@ model Account {
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  // Pas besoin de @@map("accounts")
 }
 
 model Session {
@@ -52,8 +45,6 @@ model Session {
   userId       String   @map("user_id")
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Pas besoin de @@map("sessions")
 }
 
 model VerificationToken {
@@ -62,82 +53,82 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-  // Pas besoin de @@map("verification_tokens")
 }
 
+enum RecipeCategory {
+  TARTES
+  CHOCOLAT
+  CREMES
+  GOURMANDISES
+  VIENNOISERIES
+  CONFISERIES
+  ENTREMETS
+  BISCUITS
+  GATEAUX_DE_VOYAGES
+}
 
-// Modèles spécifiques à l'application (structure Recette améliorée)
 model Recipe {
   id           String       @id @default(cuid())
   title        String
-  slug         String       @unique // Ajouter un slug unique
-  description  String?      @db.Text // Description optionnelle
-  image        String?      // Image peut être optionnelle
-  difficulty   String?      // Ex: Facile, Moyen, Difficile
-  prepTime     Int?         // Temps de préparation en minutes
-  cookTime     Int?         // Temps de cuisson en minutes
-  basePortions Int          // Nombre de portions de base
-  category     String?      // Catégorie de la recette
-
-  ingredients Ingredient[] // Relation vers les ingrédients
-  steps       RecipeStep[] // Relation vers les étapes
-
+  slug         String       @unique
+  description  String?
+  image        String?
+  difficulty   String?
+  prepTime     Int?
+  cookTime     Int?
+  basePortions Int
+  category     RecipeCategory @default(TARTES) // Utilise la nouvelle énumération, n'est plus optionnel, et a une valeur par défaut
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   published    Boolean      @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  ingredients  Ingredient[]
+  steps        RecipeStep[]
 }
 
 model Ingredient {
   id       String @id @default(cuid())
   name     String
-  quantity Float // Utiliser Float pour gérer les décimaux (ex: 0.5 sachet)
-  unit     String // Ex: g, ml, pcs, cuillère à café
+  quantity Float
+  unit     String
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
-  recipeId String // Clé étrangère vers Recipe
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade) // Relation
-
-  @@index([recipeId]) // Index pour améliorer les requêtes
+  @@index([recipeId])
 }
 
 model RecipeStep {
-  id          String  @id @default(cuid())
-  order       Int // Pour définir l'ordre des étapes
-  description String  @db.Text
-  duration    Int? // Durée optionnelle en secondes (ou minutes, à décider)
+  id          String @id @default(cuid())
+  order       Int
+  description String
+  duration    Int?
+  recipeId    String
+  recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
-  recipeId String // Clé étrangère vers Recipe
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade) // Relation
-
-  @@unique([recipeId, order]) // Assurer un ordre unique par recette
-  @@index([recipeId]) // Index pour améliorer les requêtes
+  @@unique([recipeId, order])
+  @@index([recipeId])
 }
 
 model Creation {
   id          String   @id @default(cuid())
   title       String
   description String
-  image       String? // Image peut être optionnelle
+  image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  published   Boolean   @default(false)
-
-  // @@map facultatif, Prisma utilisera "Creation" par défaut
+  published   Boolean  @default(false)
 }
 
 model Article {
-  id        String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  slug        String    @unique // Ajout du slug unique
-  excerpt     String?   @db.Text // Ajout de l'extrait optionnel
-  content     String    @db.Text // Utiliser Text pour les contenus longs
-  image       String?   // Ajout de l'image optionnelle
+  content     String
   tags        String[]
-  publishedAt DateTime? // Ajout de la date de publication optionnelle
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  // @@map facultatif, Prisma utilisera "Article" par défaut
+  excerpt     String?
+  image       String?
+  publishedAt DateTime?
+  slug        String    @unique
 }
 
 model NewsletterSubscriber {
@@ -147,11 +138,10 @@ model NewsletterSubscriber {
 }
 
 model NewsletterCampaign {
-  id        String   @id @default(cuid())
-  title     String
-  message   String   @db.Text // Utiliser @db.Text pour les messages potentiellement longs
-  sentAt    DateTime @default(now())
-  scheduledAt DateTime? // Date de planification optionnelle
-  recipientCount Int @default(0)
-
+  id             String    @id @default(cuid())
+  title          String
+  message        String
+  sentAt         DateTime  @default(now())
+  scheduledAt    DateTime?
+  recipientCount Int       @default(0)
 }

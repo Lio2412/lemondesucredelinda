@@ -4,17 +4,18 @@ import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { RecipeCard } from '@/components/recipe/RecipeCard';
 import { Input } from '@/components/ui/input';
-import type { Recipe } from '@prisma/client'; // Importer le type Recipe de Prisma
+// Importer RecipeCategory comme valeur et Recipe comme type
+import { RecipeCategory, type Recipe } from '@prisma/client';
 
-// Type ajusté pour inclure description et category
+// Type ajusté pour inclure description et category, slug supprimé
 type RecipeForGrid = Pick<
   Recipe,
   | 'id'
   | 'title'
-  | 'slug'
+  // | 'slug' // Supprimé
   | 'image'
-  | 'description' // Ajouter description
-  | 'category'    // Ajouter category
+  | 'description'
+  | 'category'
 >;
 
 interface RecipeGridProps {
@@ -29,10 +30,13 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
 
   // Générer dynamiquement les catégories uniques à partir des recettes
   const categories = useMemo(() => {
-    // Filtrer les catégories null ou vides avant de créer l'ensemble
-    const validCategories = recipes.map(recipe => recipe.category).filter((cat): cat is string => cat !== null && cat !== '');
+    // Utiliser les valeurs de l'enum RecipeCategory
+    const validCategories = recipes
+      .map(recipe => recipe.category)
+      // Filtrer les valeurs null/undefined et s'assurer qu'elles sont des RecipeCategory valides
+      .filter((cat): cat is RecipeCategory => cat !== null && cat !== undefined && Object.values(RecipeCategory).includes(cat));
     const uniqueCategories = new Set(validCategories);
-    const categoryList = Array.from(uniqueCategories).sort(); // Trier alphabétiquement
+    const categoryList = Array.from(uniqueCategories).sort(); // Trier alphabétiquement les valeurs de l'enum
     return ['Tous', ...categoryList]; // Ajouter "Tous" au début
   }, [recipes]);
 
@@ -88,11 +92,12 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
           filteredRecipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
+              id={recipe.id} // Ajouter la prop id
               title={recipe.title}
-              slug={recipe.slug}
+              // slug={recipe.slug} // Supprimé
               image={recipe.image ?? '/images/default-recipe.jpg'}
               description={recipe.description ?? undefined} // Passer undefined si null
-              category={recipe.category ?? undefined} // Passer undefined si null
+              category={recipe.category ?? undefined} // Passer la valeur de l'enum
             />
           ))
         ) : (
