@@ -89,7 +89,7 @@ export default async function Home() {
 
               return (
                 <article key={recipe.id} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  <Link href={`/recettes/${recipe.slug}`}>
+                  <Link href={`/recettes/${recipe.id}`}>
                     <div className="aspect-video relative overflow-hidden">
                       <Image
                         src={recipe.image || '/images/placeholder.png'} // Utiliser l'image de la recette ou un placeholder
