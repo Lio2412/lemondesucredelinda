@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod'; // Importer Zod pour parser les données
 import { RecipeCategory } from '@prisma/client'; // Importer l'enum RecipeCategory
+import slugify from 'slugify'; // Importer slugify pour générer des slugs
 
 // Nom du bucket Supabase Storage
 const BUCKET_NAME = 'images';
@@ -137,6 +138,19 @@ export async function POST(req: Request) {
     }
     // --- Fin Gestion de l'upload d'image ---
 
+    // Générer un slug unique à partir du titre
+    const baseSlug = slugify(title, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+    
+    // Vérifier si le slug existe déjà et générer un slug unique si nécessaire
+    let slugExists = await prisma.recipe.findUnique({ where: { slug } });
+    while (slugExists) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+      slugExists = await prisma.recipe.findUnique({ where: { slug } });
+    }
+
     // Utiliser une transaction Prisma pour créer la recette et ses relations
     // Force update check
 
@@ -144,6 +158,7 @@ export async function POST(req: Request) {
       const createdRecipe = await tx.recipe.create({
         data: {
           title,
+          slug, // Ajouter le slug généré
           description,
           difficulty,
           prepTime,
