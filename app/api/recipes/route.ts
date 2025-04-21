@@ -46,7 +46,6 @@ export async function POST(req: Request) {
     if (contentType?.includes('multipart/form-data')) {
       const formData = await req.formData();
       title = formData.get('title') as string;
-      // slug = formData.get('slug') as string; // Supprimé
       description = formData.get('description') as string | undefined;
       difficulty = formData.get('difficulty') as string | undefined;
       prepTime = formData.get('prepTime') ? parseInt(formData.get('prepTime') as string, 10) : undefined;
@@ -58,7 +57,7 @@ export async function POST(req: Request) {
       const publishedStr = formData.get('published') as string | null; // Récupérer published
       const image = formData.get('image') as File | null;
 
-      // Vérifier les champs requis (slug supprimé)
+      // Vérifier les champs requis
       if (!title || !basePortions || !categoryStr || !ingredientsStr || !stepsStr) {
         return NextResponse.json({ error: 'Données FormData manquantes ou invalides' }, { status: 400 });
       }
@@ -88,7 +87,6 @@ export async function POST(req: Request) {
       const jsonData = await req.json();
       // Valider toutes les données JSON avec un schéma global si nécessaire (ou individuellement)
       title = jsonData.title;
-      // slug = jsonData.slug; // Supprimé
       description = jsonData.description;
       difficulty = jsonData.difficulty;
       prepTime = jsonData.prepTime;
