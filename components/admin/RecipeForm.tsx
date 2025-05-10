@@ -101,6 +101,7 @@ const defaultFormValues: RecipeFormValues = {
 
 
 export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { // Récupérer recipeId
+  console.log('[RecipeForm] Mounted', { recipeId, initialData });
   const router = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(
     // Afficher l'image initiale si c'est une URL valide
@@ -113,6 +114,13 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
     defaultValues: initialData ?? defaultFormValues,
     mode: 'onChange',
   });
+
+  React.useEffect(() => {
+    console.log('[RecipeForm] useEffect - component did mount or update');
+    return () => {
+      console.log('[RecipeForm] Unmounted');
+    };
+  }, []);
 
   const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({
     control: form.control,
@@ -140,6 +148,7 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
   };
 
   const onSubmit: SubmitHandler<RecipeFormValues> = async (data) => {
+    console.log('[RecipeForm] onSubmit - Start');
     setIsSubmitting(true);
 
     const isEditing = !!recipeId;
@@ -192,18 +201,21 @@ formData.append('image', imageFile);
     try {
       const method = isEditing ? 'PUT' : 'POST';
       const endpoint = isEditing ? `/api/recipes/${recipeId}` : '/api/recipes';
-
+      console.log('[RecipeForm] onSubmit - Before fetch', { method, endpoint });
       const response = await fetch(endpoint, {
         method: method,
         headers: headers, // Utiliser les headers définis
         body: body,       // Utiliser le body préparé (FormData ou JSON string)
       });
+      console.log('[RecipeForm] onSubmit - After fetch', { ok: response.ok, status: response.status });
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.log('[RecipeForm] onSubmit - Fetch error data', errorData);
         throw new Error(errorData.error || `Échec de la ${recipeId ? 'mise à jour' : 'création'}`);
       }
 
+      console.log('[RecipeForm] onSubmit - Before toast');
       // Afficher le toast uniquement en cas de mise à jour réussie
       if (recipeId && response.ok) {
         toast({
@@ -217,11 +229,16 @@ formData.append('image', imageFile);
           description: "Recette enregistrée avec succès.",
         });
       }
+      console.log('[RecipeForm] onSubmit - After toast');
 
+      console.log('[RecipeForm] onSubmit - Before router.push');
       router.push('/admin/recipes'); // Rediriger vers la liste
+      console.log('[RecipeForm] onSubmit - After router.push (should not be reached if push navigates immediately)');
       router.refresh(); // Rafraîchir les données de la liste
+      console.log('[RecipeForm] onSubmit - After router.refresh');
 
     } catch (error) {
+      console.log('[RecipeForm] onSubmit - Catch block');
       console.error("Erreur lors de la soumission:", error);
       toast({
         title: "Erreur",
@@ -229,7 +246,9 @@ formData.append('image', imageFile);
         // variant: "destructive", // Retiré si non supporté
       });
     } finally {
+      console.log('[RecipeForm] onSubmit - Finally block');
       setIsSubmitting(false);
+      console.log('[RecipeForm] onSubmit - End');
     }
   };
 
