@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
-import { revalidateTag } from 'next/cache';
+import { revalidateTag, revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod'; // Importer Zod pour parser les données
 import { RecipeCategory } from '@prisma/client'; // Importer l'enum RecipeCategory
@@ -196,6 +196,7 @@ export async function POST(req: Request) {
 
 
     revalidateTag('recipes'); // Revalider la liste des recettes
+    revalidatePath('/admin/recipes'); // Revalider la page d'administration des recettes
     // Le tag spécifique à la recette n'est pas utile ici car la page de détail utilise un slug qui est généré
     // et ne peut pas être connu à l'avance pour revalider un tag comme `recipe-${newRecipe.id}`.
     // revalidatePath pourrait être utilisé si on connaissait le slug exact, mais revalidateTag('recipes')

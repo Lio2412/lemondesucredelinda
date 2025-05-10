@@ -72,6 +72,7 @@ export async function DELETE(
       revalidatePath(`/recettes/${recipe.slug}`); // Pour la page de détail de la recette supprimée
     }
     revalidatePath('/recettes'); // Assurer la revalidation de la page de liste principale
+    revalidatePath('/admin/recipes'); // Revalider la page d'administration des recettes
 
     // 3. Si une image existait, la supprimer de Supabase
     if (recipe?.image) {
@@ -310,6 +311,7 @@ export async function PUT(
       revalidatePath(`/recettes/${updatedRecipe.slug}`); // Pour la page de détail par slug
     }
     revalidatePath('/recettes'); // Assurer la revalidation de la page de liste principale
+    revalidatePath('/admin/recipes'); // Revalider la page d'administration des recettes
 
 
     console.log(`Recette mise à jour: ${recipeId}`);
