@@ -137,7 +137,27 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
     if (file) {
+      if (!acceptedTypes.includes(file.type)) {
+        toast({
+          title: "Type de fichier non supporté",
+          description: `Le format ${file.type} n'est pas accepté. Veuillez choisir un fichier JPEG, PNG, WEBP ou GIF.`,
+          variant: "destructive",
+        });
+        // Réinitialiser l'input si le type est incorrect
+        if (event.target) {
+          event.target.value = "";
+        }
+        // Ne pas mettre à jour l'aperçu ni le formulaire
+        // Il est important de ne pas appeler setImagePreview(null) ou form.setValue('image', undefined) ici
+        // si on veut garder l'image précédente en cas d'erreur de sélection.
+        // Si l'intention est de vider le champ en cas d'erreur, alors on pourrait les appeler.
+        // Pour l'instant, on empêche juste la sélection du fichier invalide.
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -145,8 +165,13 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
       reader.readAsDataURL(file);
       form.setValue('image', file); // Stocker l'objet File
     } else {
-      setImagePreview(null);
-      form.setValue('image', undefined);
+      // Si aucun fichier n'est sélectionné (par exemple, l'utilisateur annule la sélection)
+      // On ne réinitialise pas l'image si une image était déjà présente et valide.
+      // Si l'utilisateur veut supprimer l'image, il faudrait un bouton dédié.
+      // Pour l'instant, si `file` est nul, on ne fait rien pour ne pas effacer une image existante.
+      // Si on veut explicitement vider le champ quand l'utilisateur annule :
+      // setImagePreview(null);
+      // form.setValue('image', undefined);
     }
   };
 
@@ -382,7 +407,7 @@ formData.append('image', imageFile);
                    <Input
                      id="recipeImage"
                      type="file"
-                     accept="image/*"
+                     accept="image/jpeg, image/png, image/webp, image/gif"
                      onChange={handleImageChange}
                      className="hidden"
                      disabled={isSubmitting}
