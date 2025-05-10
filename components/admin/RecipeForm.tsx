@@ -237,9 +237,7 @@ formData.append('image', imageFile);
       console.log('[RecipeForm] onSubmit - After toast');
 
       console.log('[RecipeForm] onSubmit - Before router.push');
-      router.push('/admin/recipes'); // Rediriger vers la liste
-      console.log('[RecipeForm] onSubmit - After router.push (should not be reached if push navigates immediately)');
-      router.refresh(); // Rafraîchir les données de la liste
+      window.location.assign('/admin/recipes');
       console.log('[RecipeForm] onSubmit - After router.refresh');
 
     } catch (error) {
