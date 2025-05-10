@@ -103,6 +103,7 @@ const defaultFormValues: RecipeFormValues = {
 export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { // Récupérer recipeId
   console.log('[RecipeForm] Mounted', { recipeId, initialData });
   const router = useRouter();
+  const mountedRef = React.useRef(true);
   const [imagePreview, setImagePreview] = useState<string | null>(
     // Afficher l'image initiale si c'est une URL valide
     typeof initialData?.image === 'string' ? initialData.image : null
@@ -117,8 +118,10 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
 
   React.useEffect(() => {
     console.log('[RecipeForm] useEffect - component did mount or update');
+    mountedRef.current = true;
     return () => {
       console.log('[RecipeForm] Unmounted');
+      mountedRef.current = false;
     };
   }, []);
 
@@ -217,17 +220,19 @@ formData.append('image', imageFile);
 
       console.log('[RecipeForm] onSubmit - Before toast');
       // Afficher le toast uniquement en cas de mise à jour réussie
-      if (recipeId && response.ok) {
-        toast({
-          title: "Succès",
-          description: "✅ Recette mise à jour avec succès !",
-        });
-      } else if (!recipeId && response.ok) {
-        // Garder un message pour la création si nécessaire, ou ajuster
-         toast({
-          title: "Succès",
-          description: "Recette enregistrée avec succès.",
-        });
+      if (mountedRef.current) {
+        if (recipeId && response.ok) {
+          toast({
+            title: "Succès",
+            description: "✅ Recette mise à jour avec succès !",
+          });
+        } else if (!recipeId && response.ok) {
+          // Garder un message pour la création si nécessaire, ou ajuster
+           toast({
+            title: "Succès",
+            description: "Recette enregistrée avec succès.",
+          });
+        }
       }
       console.log('[RecipeForm] onSubmit - After toast');
 
@@ -240,14 +245,18 @@ formData.append('image', imageFile);
     } catch (error) {
       console.log('[RecipeForm] onSubmit - Catch block');
       console.error("Erreur lors de la soumission:", error);
-      toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Une erreur est survenue.",
-        // variant: "destructive", // Retiré si non supporté
-      });
+      if (mountedRef.current) {
+        toast({
+          title: "Erreur",
+          description: error instanceof Error ? error.message : "Une erreur est survenue.",
+          // variant: "destructive", // Retiré si non supporté
+        });
+      }
     } finally {
       console.log('[RecipeForm] onSubmit - Finally block');
-      setIsSubmitting(false);
+      if (mountedRef.current) {
+        setIsSubmitting(false);
+      }
       console.log('[RecipeForm] onSubmit - End');
     }
   };
