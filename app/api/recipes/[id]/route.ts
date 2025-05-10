@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { revalidateTag, revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod'; // Importer Zod
 import { RecipeCategory } from '@prisma/client'; // Importer l'enum RecipeCategory
@@ -57,13 +58,20 @@ export async function DELETE(
     // 1. Récupérer l'URL de l'image avant de supprimer la recette
     const recipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
-      select: { image: true },
+      select: { image: true, slug: true }, // Récupérer aussi le slug pour revalidatePath
     });
 
     // 2. Supprimer la recette de Prisma (les relations seront supprimées en cascade)
     await prisma.recipe.delete({
       where: { id: recipeId },
     });
+
+    // Revalidation
+    revalidateTag('recipes'); // Pour la liste des recettes
+    if (recipe?.slug) {
+      revalidatePath(`/recettes/${recipe.slug}`); // Pour la page de détail de la recette supprimée
+    }
+    revalidatePath('/recettes'); // Assurer la revalidation de la page de liste principale
 
     // 3. Si une image existait, la supprimer de Supabase
     if (recipe?.image) {
@@ -294,6 +302,15 @@ export async function PUT(
       // Retourner la recette mise à jour (sans relations pour la réponse)
       return recipeUpdate;
     });
+
+    // Revalidation
+    revalidateTag('recipes'); // Pour la liste des recettes
+    revalidateTag(`recipe-${recipeId}`); // Pour cette recette spécifique par ID
+    if (updatedRecipe.slug) {
+      revalidatePath(`/recettes/${updatedRecipe.slug}`); // Pour la page de détail par slug
+    }
+    revalidatePath('/recettes'); // Assurer la revalidation de la page de liste principale
+
 
     console.log(`Recette mise à jour: ${recipeId}`);
     return NextResponse.json(updatedRecipe); // Retourner la recette mise à jour

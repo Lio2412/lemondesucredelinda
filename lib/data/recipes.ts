@@ -24,6 +24,8 @@ export const getAllRecipes = async ({ includeUnpublished = false }: { includeUnp
       orderBy: {
         createdAt: 'desc',
       },
+      // @ts-ignore // Next.js fetch cache options
+      next: { tags: ['recipes'] },
     });
     return recipes; // Le type retourné correspond toujours à RecipeWithStepCount[]
   } catch (error) {
@@ -41,6 +43,8 @@ export const getRecipeById = async (id: string) => { // Le type retourné est in
         ingredients: { orderBy: { id: 'asc' } }, // Ordonner si nécessaire
         steps: { orderBy: { order: 'asc' } },   // Ordonner par le champ 'order'
       },
+      // @ts-ignore // Next.js fetch cache options
+      next: { tags: ['recipes', `recipe-${id}`] },
     });
     return recipe; // Retourne Recipe & { ingredients: Ingredient[], steps: RecipeStep[] } | null
   } catch (error) {
@@ -69,6 +73,8 @@ export const getRecipesForGrid = async () => {
       orderBy: {
         createdAt: 'desc',
       },
+      // @ts-ignore // Next.js fetch cache options
+      next: { tags: ['recipes'] },
     });
     // Le type retourné correspondra à ce que RecipeGrid attend (implicitement)
     return recipes;
@@ -103,6 +109,8 @@ export const getPublishedRecipes = async (limit: number = 3) => {
         prepTime: true, // Utiliser prepTime et cookTime
         cookTime: true,
       },
+      // @ts-ignore // Next.js fetch cache options
+      next: { tags: ['recipes'] },
     });
     return recipes;
   } catch (error) {
