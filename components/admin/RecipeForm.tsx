@@ -237,7 +237,8 @@ formData.append('image', imageFile);
       console.log('[RecipeForm] onSubmit - After toast');
 
       console.log('[RecipeForm] onSubmit - Before router.push');
-      window.location.assign('/admin/recipes');
+      router.push('/admin/recipes');
+      router.refresh();
       console.log('[RecipeForm] onSubmit - After router.refresh');
 
     } catch (error) {

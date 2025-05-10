@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { Recipe } from '@prisma/client'; // Importer le type Recipe généré par Prisma
 
@@ -10,6 +11,7 @@ export type RecipeWithStepCount = Pick<Recipe, 'id' | 'title' | 'createdAt'> & {
 };
 
 export const getAllRecipes = async ({ includeUnpublished = false }: { includeUnpublished?: boolean } = {}): Promise<RecipeWithStepCount[]> => {
+  noStore(); // Désactive la mise en cache pour cette fonction
   try {
     const recipes = await prisma.recipe.findMany({
       where: includeUnpublished ? undefined : { published: true }, // Filtrer si includeUnpublished est false
