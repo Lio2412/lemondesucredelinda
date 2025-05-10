@@ -114,28 +114,47 @@ export async function POST(req: Request) {
     if (imageFile) {
       const fileExtension = imageFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExtension}`;
-      const filePath = `recipes/${fileName}`;
+      let uploadedImagePath = `recipes/${fileName}`;
 
       const { error: uploadError } = await supabaseAdmin
         .storage
         .from(BUCKET_NAME)
-        .upload(filePath, imageFile);
+        .upload(uploadedImagePath, imageFile);
 
       if (uploadError) {
         console.error("Erreur d'upload Supabase:", uploadError);
         throw new Error("Impossible d'uploader l'image.");
       }
 
+      // Appel à la fonction Edge image-converter
+      console.log(`[API Recipes POST] Appel de image-converter pour: ${uploadedImagePath}`);
+      const { data: conversionResult, error: conversionFnError } = await supabaseAdmin.functions.invoke('image-converter', {
+        body: { bucketName: BUCKET_NAME, filePath: uploadedImagePath }
+      });
+
+      let finalImagePath = uploadedImagePath; // Par défaut, l'image originale
+
+      if (conversionFnError) {
+        console.error('[API Recipes POST] Erreur fonction Edge image-converter:', conversionFnError.message);
+        // Continuer avec l'image originale si la conversion échoue
+      } else if (conversionResult) {
+        console.log('[API Recipes POST] Résultat image-converter:', conversionResult);
+        finalImagePath = conversionResult.newFilePath || conversionResult.originalFilePath || uploadedImagePath;
+      }
+      
+      console.log(`[API Recipes POST] Chemin final de l'image après conversion (ou non): ${finalImagePath}`);
+
       const { data: publicUrlData } = supabaseAdmin
         .storage
         .from(BUCKET_NAME)
-        .getPublicUrl(filePath);
+        .getPublicUrl(finalImagePath); // Utiliser finalImagePath
 
       if (!publicUrlData?.publicUrl) {
-         console.error("Erreur récupération URL publique Supabase:", filePath);
-         throw new Error("Impossible d'obtenir l'URL publique de l'image.");
+         console.error("Erreur récupération URL publique Supabase pour:", finalImagePath);
+         throw new Error("Impossible d'obtenir l'URL publique de l'image finale.");
       }
       imageUrl = publicUrlData.publicUrl;
+      console.log(`[API Recipes POST] URL publique finale: ${imageUrl}`);
     }
     // --- Fin Gestion de l'upload d'image ---
 

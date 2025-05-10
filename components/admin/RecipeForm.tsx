@@ -34,8 +34,9 @@ import { Label } from "@/components/ui/label"; // Importer Label
 import { PlusCircle, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-
-// Schéma pour un ingrédient individuel (adapté pour Prisma)
+import { supabase } from '@/lib/supabase'; // Ajout de l'import supabase
+ 
+ // Schéma pour un ingrédient individuel (adapté pour Prisma)
 const ingredientSchema = z.object({
   // id n'est plus nécessaire ici, Prisma le gère
   name: z.string().min(1, { message: 'Le nom est requis.' }),
@@ -137,7 +138,7 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
 
     if (file) {
       if (!acceptedTypes.includes(file.type)) {
@@ -243,30 +244,27 @@ formData.append('image', imageFile);
         throw new Error(errorData.error || `Échec de la ${recipeId ? 'mise à jour' : 'création'}`);
       }
 
-      console.log('[RecipeForm] onSubmit - Before toast');
-      // Afficher le toast uniquement en cas de mise à jour réussie
-      if (mountedRef.current) {
-        if (recipeId && response.ok) {
-          toast({
-            title: "Succès",
-            description: "✅ Recette mise à jour avec succès !",
-          });
-        } else if (!recipeId && response.ok) {
-          // Garder un message pour la création si nécessaire, ou ajuster
-           toast({
-            title: "Succès",
-            description: "Recette enregistrée avec succès.",
-          });
-        }
-      }
-      console.log('[RecipeForm] onSubmit - After toast');
+     const resultData = await response.json();
+     console.log('[RecipeForm] onSubmit - API Response Data', resultData);
 
-      console.log('[RecipeForm] onSubmit - Before router.push');
-      router.push('/admin/recipes');
-      router.refresh();
-      console.log('[RecipeForm] onSubmit - After router.refresh');
+     // L'API gère maintenant la conversion et retourne l'URL finale de l'image.
+     const finalImageUrlFromApi = resultData.image; // ou resultData.imageUrl selon ce que l'API retourne
 
-    } catch (error) {
+     console.log('[RecipeForm] onSubmit - Before toast');
+     if (mountedRef.current) {
+       toast({
+         title: "Succès",
+         description: `Recette ${isEditing ? 'mise à jour' : 'enregistrée'} avec succès. URL image: ${finalImageUrlFromApi || 'N/A'}`,
+       });
+     }
+     console.log('[RecipeForm] onSubmit - After toast');
+
+     console.log('[RecipeForm] onSubmit - Before router.push');
+     router.push('/admin/recipes');
+     router.refresh();
+     console.log('[RecipeForm] onSubmit - After router.refresh');
+
+   } catch (error) {
       console.log('[RecipeForm] onSubmit - Catch block');
       console.error("Erreur lors de la soumission:", error);
       if (mountedRef.current) {
@@ -407,7 +405,7 @@ formData.append('image', imageFile);
                    <Input
                      id="recipeImage"
                      type="file"
-                     accept="image/jpeg, image/png, image/webp, image/gif"
+                     accept="image/jpeg, image/png, image/webp, image/gif, image/heic, image/heif"
                      onChange={handleImageChange}
                      className="hidden"
                      disabled={isSubmitting}
