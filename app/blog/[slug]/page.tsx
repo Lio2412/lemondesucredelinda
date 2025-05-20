@@ -7,7 +7,8 @@ import { getArticleBySlug } from '@/lib/data/articles'; // Importer la fonction 
 import { Badge } from '@/components/ui/badge';
 import { Playfair_Display } from 'next/font/google';
 import { CalendarDays } from 'lucide-react';
-// Retirer l'import de motion ici, il est dans le composant client
+import ReactMarkdown from 'react-markdown'; // Importer ReactMarkdown
+import remarkGfm from 'remark-gfm'; // Importer remark-gfm pour les extensions Markdown
 import AnimatedArticleTitle from '@/components/blog/AnimatedArticleTitle'; // Importer le nouveau composant
 
 // Instancier la police Playfair Display
@@ -82,13 +83,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound(); // Déclenche la page not-found.tsx
   }
 
-  // Fonction simple pour rendre le contenu (à améliorer si besoin de Markdown/HTML)
-  const renderContent = (content: string) => {
-    // Ici, on sépare juste par ligne. Pour du Markdown, utiliser une librairie comme 'react-markdown'.
-    return content.split('\n').map((paragraph, index) => (
-      <p key={index} className={paragraph.trim() === '' ? 'h-4' : ''}>{paragraph}</p>
-    ));
-  };
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen">
@@ -142,7 +136,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
            {/* Contenu de l'article */}
            {/* Appliquer les styles prose pour le formatage */}
            <div className="prose prose-lg dark:prose-invert max-w-none prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white prose-strong:text-gray-800 dark:prose-strong:text-gray-200 prose-a:text-pink-600 dark:prose-a:text-pink-400 hover:prose-a:text-pink-700 dark:hover:prose-a:text-pink-300 prose-li:marker:text-pink-500">
-             {renderContent(article.content)}
+             <ReactMarkdown
+               remarkPlugins={[remarkGfm]}
+             >
+               {article.content}
+             </ReactMarkdown>
            </div>
          </article>
        </div>
