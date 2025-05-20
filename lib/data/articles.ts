@@ -2,16 +2,27 @@ import { prisma } from '@/lib/prisma'; // Correction de l'import
 import { Article } from '@prisma/client'; // Importer le type Article généré par Prisma
 
 // Fonction pour récupérer tous les articles depuis Prisma
-export const getAllArticles = async (): Promise<Pick<Article, 'id' | 'title' | 'createdAt'>[]> => {
+export const getAllArticles = async (): Promise<Pick<Article, 'id' | 'title' | 'slug' | 'image' | 'excerpt' | 'createdAt' | 'publishedAt' | 'content' | 'tags'>[]> => {
   try {
     const articles = await prisma.article.findMany({
+      where: {
+        publishedAt: {
+          lte: new Date(), // Seulement les articles dont la date de publication est passée ou présente
+        },
+      },
       select: {
         id: true,
         title: true,
+        slug: true,
+        image: true,
+        excerpt: true,
         createdAt: true,
+        publishedAt: true,
+        content: true, // Ajout du champ content
+        tags: true,    // Ajout du champ tags
       },
       orderBy: {
-        createdAt: 'desc', // Optionnel ici, car le tri final se fait dans la page admin
+        publishedAt: 'desc', // Trier par date de publication descendante
       },
     });
     return articles;
@@ -24,10 +35,12 @@ export const getAllArticles = async (): Promise<Pick<Article, 'id' | 'title' | '
 // Fonction pour récupérer un article par son slug depuis Prisma
 export const getArticleBySlug = async (slug: string): Promise<Article | null> => {
   try {
-    // Utiliser findFirst qui est plus flexible pour les champs non-ID uniques
     const article = await prisma.article.findFirst({
       where: {
-        slug: slug, // Chercher par le champ slug
+        slug: slug,
+        publishedAt: {
+          lte: new Date(), // S'assurer que l'article est publié
+        },
       },
     });
     return article;

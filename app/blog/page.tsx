@@ -1,7 +1,7 @@
 // Retirer 'use client' pour en faire un Server Component
 import React from 'react';
 import { Playfair_Display } from 'next/font/google';
-import { prisma } from '@/lib/prisma';
+import { getAllArticles } from '@/lib/data/articles';
 // Importer le composant client pour le titre
 import AnimatedPageTitle from '@/components/layout/AnimatedPageTitle';
 // Importer le composant client pour la grille
@@ -16,20 +16,8 @@ const playfairDisplay = Playfair_Display({
 // Suppression de l'interface locale, des données mockées et des catégories mockées
 
 export default async function BlogPage() { // Rendre async
-  // Récupérer les articles depuis Prisma
-  const articles = await prisma.article.findMany({
-    orderBy: { createdAt: 'desc' },
-    // Sélectionner les champs nécessaires pour l'affichage et le filtrage/lien
-    select: {
-      id: true,
-      title: true,
-      createdAt: true,
-      tags: true, // Pourrait être utilisé pour les catégories/tags
-      content: true, // Pour le résumé et la recherche
-      slug: true,    // Ajouter le slug pour les liens
-      image: true,   // Ajouter l'image pour l'affichage
-    }
-  });
+  // Récupérer les articles depuis lib/data/articles.ts
+  const articles = await getAllArticles();
 
   // La logique de recherche, filtrage, pagination et affichage sera dans BlogGrid
 
