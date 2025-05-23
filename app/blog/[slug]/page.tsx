@@ -120,7 +120,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                  alt={article.title ?? 'Image article'}
                  fill
                  sizes="(max-width: 768px) 100vw, 800px"
-                 className="object-contain"
+                 className="object-cover"
                  priority
                />
              </div>
