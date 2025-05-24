@@ -82,17 +82,26 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
 
   // Gestionnaire simplifié pour le nouveau composant iOS
   const handleImageSelect = (file: File) => {
+    console.log('[DIAGNOSTIC iOS] handleImageSelect appelé avec:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      timestamp: new Date().toISOString()
+    });
+    
     setSelectedImage(file);
     
     // Créer un aperçu de l'image
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
+      console.log('[DIAGNOSTIC iOS] Preview créé avec succès');
     };
     reader.readAsDataURL(file);
     
     // Mettre à jour le formulaire
     form.setValue('imageUrl', file);
+    console.log('[DIAGNOSTIC iOS] Formulaire mis à jour avec le fichier');
     
     console.log('[iOS Image Upload] File selected:', {
       name: file.name,
@@ -103,6 +112,13 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
 
   // Fonction onSubmit restaurée pour gérer POST et PUT
   const onSubmit = async (values: CreationFormValues) => {
+    console.log('[DIAGNOSTIC iOS] onSubmit démarré avec values:', {
+      title: values.title,
+      hasFile: values.imageUrl instanceof File,
+      fileSize: values.imageUrl instanceof File ? values.imageUrl.size : 'N/A',
+      timestamp: new Date().toISOString()
+    });
+
     setIsSubmitting(true);
     let response: Response;
     const method = creationId ? 'PUT' : 'POST'; // Logique conditionnelle restaurée
@@ -112,18 +128,34 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       if (method === 'PUT') {
         // Si une nouvelle image est sélectionnée (c'est un File), envoyer FormData
         if (values.imageUrl instanceof File) {
+          console.log('[DIAGNOSTIC iOS] PUT avec FormData - Préparation...');
           const formData = new FormData();
           formData.append('title', values.title);
           formData.append('description', values.description || "");
           formData.append('image', values.imageUrl, values.imageUrl.name);
           formData.append('published', String(values.published ?? false)); // Ajouter published pour PUT avec FormData
-          // Note: La date n'est pas envoyée ici, l'API PUT devra l'ignorer ou la gérer si nécessaire
+          
+          console.log('[DIAGNOSTIC iOS] FormData créé pour PUT:', {
+            title: values.title,
+            fileName: values.imageUrl.name,
+            fileSize: values.imageUrl.size
+          });
 
+          const startTime = Date.now();
           response = await fetch(endpoint, {
             method: 'PUT',
             body: formData, // Envoyer FormData
           });
+          const endTime = Date.now();
+          
+          console.log('[DIAGNOSTIC iOS] Réponse PUT reçue:', {
+            status: response.status,
+            ok: response.ok,
+            duration: endTime - startTime,
+            timestamp: new Date().toISOString()
+          });
         } else {
+          console.log('[DIAGNOSTIC iOS] PUT avec JSON - Pas de nouvelle image');
           // Sinon (pas de nouvelle image), envoyer JSON sans l'image
           const payload = {
             title: values.title,
@@ -139,10 +171,8 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
         }
 
       } else { // POST
+        console.log('[DIAGNOSTIC iOS] POST avec FormData - Préparation...');
         // Logique POST restaurée (envoi FormData)
-        // Note: L'API POST /api/creations attend bien FormData pour l'upload initial.
-        // Bloc de code formData dupliqué supprimé.
-        // Logique POST restaurée et adaptée pour envoyer FormData
         const formData = new FormData();
         formData.append('title', values.title);
         // Assurer que la description est envoyée, même si vide (car requise par Prisma)
@@ -151,24 +181,49 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
         // Ajouter le fichier image s'il existe et est un objet File
         if (values.imageUrl instanceof File) {
           formData.append('image', values.imageUrl, values.imageUrl.name);
+          console.log('[DIAGNOSTIC iOS] Image ajoutée au FormData:', {
+            name: values.imageUrl.name,
+            type: values.imageUrl.type,
+            size: values.imageUrl.size
+          });
+        } else {
+          console.log('[DIAGNOSTIC iOS] Aucune image à ajouter au FormData');
         }
         formData.append('published', String(values.published ?? false)); // Ajouter published pour POST avec FormData
-        // Si imageUrl est une string (URL), l'API actuelle ne la gère pas via FormData.
-        // L'utilisateur doit utiliser le champ 'Choisir une image' pour uploader.
 
+        console.log('[DIAGNOSTIC iOS] FormData créé pour POST, envoi en cours...');
+        const startTime = Date.now();
+        
         response = await fetch(endpoint, {
           method: 'POST',
           body: formData, // Envoyer FormData (pas de header Content-Type nécessaire, le navigateur le définit)
+        });
+        
+        const endTime = Date.now();
+        console.log('[DIAGNOSTIC iOS] Réponse POST reçue:', {
+          status: response.status,
+          ok: response.ok,
+          duration: endTime - startTime,
+          timestamp: new Date().toISOString()
         });
       }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Erreur inconnue lors de la requête.' }));
+        console.error('[DIAGNOSTIC iOS] Erreur réponse serveur:', {
+          status: response.status,
+          errorData,
+          timestamp: new Date().toISOString()
+        });
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
       // Succès (commun aux deux méthodes)
       const resultData = await response.json(); // Récupérer la réponse (optionnel)
+      console.log('[DIAGNOSTIC iOS] Succès - Données reçues:', {
+        resultData,
+        timestamp: new Date().toISOString()
+      });
 
       // Afficher le toast uniquement en cas de mise à jour réussie
       if (creationId && response.ok) {
@@ -197,7 +252,11 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       }
     // Bloc catch unique restauré
     } catch (error) {
-      console.error("Erreur lors de l'envoi du formulaire:", error);
+      console.error("[DIAGNOSTIC iOS] Erreur lors de l'envoi du formulaire:", {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue.';
       // Afficher le toast d'erreur
       const actionText = creationId ? 'de la mise à jour' : 'de l\'enregistrement'; // Utilisation de creationId restaurée
@@ -208,6 +267,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
       });
     } finally {
       setIsSubmitting(false);
+      console.log('[DIAGNOSTIC iOS] onSubmit terminé');
     }
   };
 

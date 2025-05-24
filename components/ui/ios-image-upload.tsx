@@ -114,10 +114,25 @@ export function IOSImageUpload({
     }
 
     if (isValid) {
+      console.log('[DIAGNOSTIC iOS] Validation réussie, appel onImageSelect...');
       setSelectedFile(file);
       setUploadStatus('success');
       setErrorMessage('');
-      onImageSelect(file);
+      
+      // Log avant l'appel du callback
+      console.log('[DIAGNOSTIC iOS] Appel onImageSelect avec:', {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        timestamp: new Date().toISOString()
+      });
+      
+      try {
+        onImageSelect(file);
+        console.log('[DIAGNOSTIC iOS] onImageSelect appelé avec succès');
+      } catch (error) {
+        console.error('[DIAGNOSTIC iOS] Erreur lors de l\'appel onImageSelect:', error);
+      }
     } else {
       setUploadStatus('error');
       setErrorMessage(validationMessage);

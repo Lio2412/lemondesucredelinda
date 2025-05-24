@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IOSImageUpload } from '@/components/ui/ios-image-upload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,15 +12,24 @@ export default function TestIOSPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [debugMode, setDebugMode] = useState(true);
   const [testResults, setTestResults] = useState<string[]>([]);
+  const [isClient, setIsClient] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isSafari, setIsSafari] = useState(false);
+  const [userAgent, setUserAgent] = useState('');
+
+  useEffect(() => {
+    setIsClient(true);
+    const ua = navigator.userAgent;
+    setUserAgent(ua);
+    setIsIOS(/iPad|iPhone|iPod/.test(ua));
+    setIsSafari(/Safari/.test(ua) && !/Chrome/.test(ua));
+  }, []);
 
   const handleImageSelect = (file: File) => {
     setSelectedFile(file);
     const result = `✅ Fichier sélectionné: ${file.name} (${file.type}, ${(file.size / 1024 / 1024).toFixed(2)} MB)`;
     setTestResults(prev => [...prev, result]);
   };
-
-  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isSafari = typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
 
   const clearResults = () => {
     setTestResults([]);
@@ -57,11 +66,11 @@ export default function TestIOSPage() {
               {isSafari ? "Safari" : "Autre"}
             </Badge>
           </div>
-          {typeof navigator !== 'undefined' && (
+          {isClient && (
             <details className="text-sm">
               <summary className="cursor-pointer font-medium">User Agent</summary>
               <div className="mt-2 p-2 bg-muted rounded font-mono text-xs break-all">
-                {navigator.userAgent}
+                {userAgent}
               </div>
             </details>
           )}
