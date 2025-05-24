@@ -35,6 +35,7 @@ import { PlusCircle, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase'; // Ajout de l'import supabase
+import { IOSImageUpload } from '@/components/ui/ios-image-upload';
  
  // Schéma pour un ingrédient individuel (adapté pour Prisma)
 const ingredientSchema = z.object({
@@ -110,6 +111,8 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
     typeof initialData?.image === 'string' ? initialData.image : null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
   const { toast } = useToast(); // Obtenir la fonction toast
   const form = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeFormSchema),
@@ -136,56 +139,25 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
     name: "steps"
   });
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
-
-    // Log de diagnostic pour iOS
-    console.log('[iOS Debug] Recipe file selected:', {
-      fileName: file?.name,
-      fileType: file?.type,
-      fileSize: file?.size,
-      userAgent: navigator.userAgent,
-      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+  // Gestionnaire simplifié pour le nouveau composant iOS
+  const handleImageSelect = (file: File) => {
+    setSelectedImage(file);
+    
+    // Créer un aperçu de l'image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Mettre à jour le formulaire
+    form.setValue('image', file);
+    
+    console.log('[iOS Recipe Upload] File selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
     });
-
-    if (file) {
-      // Validation plus permissive pour iOS
-      const isValidType = acceptedTypes.includes(file.type) ||
-                         file.type === '' || // iOS peut parfois ne pas détecter le type
-                         /^image\//.test(file.type); // Accepter tout type d'image comme fallback
-
-      if (!isValidType) {
-        console.log('[iOS Debug] Recipe file type validation failed:', file.type);
-        toast({
-          title: "Type de fichier non supporté",
-          description: `Le format ${file.type || 'inconnu'} n'est pas accepté. Veuillez choisir un fichier image valide.`,
-          variant: "destructive",
-        });
-        // Réinitialiser l'input si le type est incorrect
-        if (event.target) {
-          event.target.value = "";
-        }
-        return;
-      }
-
-      console.log('[iOS Debug] Recipe file validation passed');
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      form.setValue('image', file); // Stocker l'objet File
-    } else {
-      // Si aucun fichier n'est sélectionné (par exemple, l'utilisateur annule la sélection)
-      // On ne réinitialise pas l'image si une image était déjà présente et valide.
-      // Si l'utilisateur veut supprimer l'image, il faudrait un bouton dédié.
-      // Pour l'instant, si `file` est nul, on ne fait rien pour ne pas effacer une image existante.
-      // Si on veut explicitement vider le champ quand l'utilisateur annule :
-      // setImagePreview(null);
-      // form.setValue('image', undefined);
-    }
   };
 
   const onSubmit: SubmitHandler<RecipeFormValues> = async (data) => {
@@ -409,43 +381,37 @@ formData.append('image', imageFile);
                 </FormItem>
               )}
             />
-             {/* Image */}
+             {/* Image avec composant iOS optimisé */}
              <FormItem>
-               <FormLabel>Image de la recette</FormLabel>
+               <FormLabel className="flex items-center justify-between">
+                 Image de la recette
+                 <Button
+                   type="button"
+                   variant="ghost"
+                   size="sm"
+                   onClick={() => setDebugMode(!debugMode)}
+                   className="text-xs h-6 px-2"
+                 >
+                   {debugMode ? 'Masquer Debug' : 'Debug iOS'}
+                 </Button>
+               </FormLabel>
                <FormControl>
-                 <div className="flex items-center gap-4">
-                   <Input
-                     id="recipeImage"
-                     type="file"
-                     accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*"
-                     onChange={handleImageChange}
-                     className="hidden"
-                     disabled={isSubmitting}
-                   />
-                   <label
-                     htmlFor="recipeImage"
-                     className={cn(
-                       "cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                       "border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2",
-                       isSubmitting && "opacity-50 cursor-not-allowed"
-                     )}
-                   >
-                     <Upload className="mr-2 h-4 w-4" />
-                     Choisir une image
-                   </label>
-                   {imagePreview && (
-                     <div className="relative h-20 w-32 rounded border overflow-hidden">
-                       <Image src={imagePreview} alt="Aperçu recette" fill style={{ objectFit: 'cover' }} className="rounded" />
-                     </div>
-                   )}
-                   {!imagePreview && typeof initialData?.image !== 'string' && (
-                     <div className="relative h-20 w-32 rounded border overflow-hidden bg-muted">
-                       <Image src="/images/default-recipe.jpg" alt="Image par défaut" fill style={{ objectFit: 'cover' }} className="rounded opacity-50" />
-                     </div>
-                   )}
-                 </div>
+                 <IOSImageUpload
+                   onImageSelect={handleImageSelect}
+                   currentImage={initialData?.image && typeof initialData.image === 'string' ? initialData.image : undefined}
+                   debugMode={debugMode}
+                   className="w-full"
+                 />
                </FormControl>
-               <FormDescription>Chargez une image pour votre recette.</FormDescription>
+               {selectedImage && (
+                 <div className="text-sm text-muted-foreground space-y-1">
+                   <p>✅ Nouvelle image sélectionnée: {selectedImage.name}</p>
+                   <p>Taille: {(selectedImage.size / 1024 / 1024).toFixed(2)} MB</p>
+                 </div>
+               )}
+               <FormDescription>
+                 Interface optimisée pour iOS avec diagnostic intégré. Cliquez sur "Debug iOS" pour voir les détails techniques.
+               </FormDescription>
                <FormMessage />
              </FormItem>
           </CardContent>

@@ -33,6 +33,7 @@ import { Calendar as CalendarIcon, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale'; // Pour le format de date français
 import { cn } from '@/lib/utils';
+import { IOSImageUpload } from '@/components/ui/ios-image-upload';
 
 // Schéma de validation Zod (restauré pour POST/PUT)
 const formSchema = z.object({
@@ -64,6 +65,8 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
     typeof initialData?.imageUrl === 'string' ? initialData.imageUrl : null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
 
   const form = useForm<CreationFormValues>({
     resolver: zodResolver(formSchema),
@@ -77,51 +80,25 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
     },
   });
 
-  // Gestionnaire de changement d'image avec validation des types HEIC/HEIF
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
-
-    // Log de diagnostic pour iOS
-    console.log('[iOS Debug] File selected:', {
-      fileName: file?.name,
-      fileType: file?.type,
-      fileSize: file?.size,
-      userAgent: navigator.userAgent,
-      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+  // Gestionnaire simplifié pour le nouveau composant iOS
+  const handleImageSelect = (file: File) => {
+    setSelectedImage(file);
+    
+    // Créer un aperçu de l'image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Mettre à jour le formulaire
+    form.setValue('imageUrl', file);
+    
+    console.log('[iOS Image Upload] File selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
     });
-
-    if (file) {
-      // Validation plus permissive pour iOS
-      const isValidType = acceptedTypes.includes(file.type) ||
-                         file.type === '' || // iOS peut parfois ne pas détecter le type
-                         /^image\//.test(file.type); // Accepter tout type d'image comme fallback
-
-      if (!isValidType) {
-        console.log('[iOS Debug] File type validation failed:', file.type);
-        toast({
-          title: "Type de fichier non supporté",
-          description: `Le format ${file.type || 'inconnu'} n'est pas accepté. Veuillez choisir un fichier image valide.`,
-        });
-        // Réinitialiser l'input si le type est incorrect
-        if (event.target) {
-          event.target.value = "";
-        }
-        return;
-      }
-
-      console.log('[iOS Debug] File validation passed');
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      form.setValue('imageUrl', file); // Stocker l'objet File
-    } else {
-      setImagePreview(null);
-      form.setValue('imageUrl', undefined);
-    }
   };
 
   // Fonction onSubmit restaurée pour gérer POST et PUT
@@ -269,53 +246,40 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
           )}
         />
 
-        {/* Champ Image restauré (URL ou Upload) */}
-        {/* Note: Le nom du champ est 'imageUrl' dans le schéma Zod restauré */}
+        {/* Champ Image avec composant iOS optimisé */}
         <FormField
           control={form.control}
           name="imageUrl"
-          render={({ field }) => ( // Utiliser field pour l'input URL si besoin, mais gérer upload séparément
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>Image</FormLabel>
+              <FormLabel className="flex items-center justify-between">
+                Image
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDebugMode(!debugMode)}
+                  className="text-xs h-6 px-2"
+                >
+                  {debugMode ? 'Masquer Debug' : 'Debug iOS'}
+                </Button>
+              </FormLabel>
               <FormControl>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id="picture"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*"
-                    onChange={handleImageChange} // Gestionnaire restauré
-                    className="hidden"
-                    disabled={isSubmitting}
-                  />
-                  <label
-                    htmlFor="picture"
-                    className={cn(
-                      "cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                      "border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2",
-                      isSubmitting && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Choisir une image
-                  </label>
-                  {/* Preview restaurée */}
-                  {imagePreview && (
-                    <div className="relative h-20 w-20 rounded border">
-                      <Image
-                        src={imagePreview}
-                        alt="Aperçu"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        className="rounded"
-                      />
-                    </div>
-                  )}
-                </div>
+                <IOSImageUpload
+                  onImageSelect={handleImageSelect}
+                  currentImage={initialData?.imageUrl && typeof initialData.imageUrl === 'string' ? initialData.imageUrl : undefined}
+                  debugMode={debugMode}
+                  className="w-full"
+                />
               </FormControl>
+              {selectedImage && (
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p>✅ Nouvelle image sélectionnée: {selectedImage.name}</p>
+                  <p>Taille: {(selectedImage.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+              )}
               <FormDescription>
-                Chargez une image ou collez une URL (l'upload n'est pas géré pour la modification, l'URL n'est pas gérée pour la création via FormData).
-                {/* Champ URL optionnel si besoin */}
-                {/* <Input type="url" placeholder="Ou collez une URL ici..." onChange={(e) => { field.onChange(e.target.value); setImagePreview(e.target.value); }} value={typeof field.value === 'string' ? field.value : ''} className="mt-2" disabled={isSubmitting}/> */}
+                Interface optimisée pour iOS avec diagnostic intégré. Cliquez sur "Debug iOS" pour voir les détails techniques.
               </FormDescription>
               <FormMessage />
             </FormItem>
