@@ -79,3 +79,42 @@ select:focus {
     @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
   }
 }
+
+/* Classes utilitaires responsive personnalisées */
+@layer utilities {
+  /* Titres adaptatifs */
+  .text-responsive-title {
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight;
+  }
+
+  /* Espacements adaptatifs */
+  .padding-responsive {
+    @apply p-2 sm:p-3 md:p-4 lg:p-6 xl:p-8;
+  }
+
+  /* Grilles standard responsive */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6;
+  }
+
+  /* Classes utilitaires supplémentaires pour l'optimisation responsive */
+  .text-responsive-subtitle {
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl font-semibold;
+  }
+
+  .text-responsive-body {
+    @apply text-sm sm:text-base md:text-lg leading-relaxed;
+  }
+
+  .margin-responsive {
+    @apply m-2 sm:m-3 md:m-4 lg:m-6 xl:m-8;
+  }
+
+  .gap-responsive {
+    @apply gap-2 sm:gap-3 md:gap-4 lg:gap-6;
+  }
+
+  .rounded-responsive {
+    @apply rounded-md sm:rounded-lg md:rounded-xl;
+  }
+}

@@ -44,11 +44,11 @@ const navigation = [
   { name: 'Contact', href: '/contact' },
 ];
 
-export default function Header() { 
+export default function Header() {
   const router = useRouter();
   const [sheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session, status } = useSession(); 
+  const { data: session, status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const user = session?.user;
   const isAdmin = user?.role === 'admin';
@@ -79,12 +79,16 @@ export default function Header() {
           <div className="md:hidden"> 
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400"
+                >
                   <Menu className="w-6 h-6" />
                   <span className="sr-only">Ouvrir le menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 bg-white dark:bg-gray-950 p-4 pt-8"> 
+              <SheetContent side="left" className="w-64 bg-white dark:bg-gray-950 p-4 pt-8">
                 <SheetHeader className="mb-4 border-b pb-3 dark:border-gray-800">
                   <SheetTitle className={`text-xl text-gray-800 dark:text-white ${playfairDisplay.className}`}>
                     Le Monde Sucré

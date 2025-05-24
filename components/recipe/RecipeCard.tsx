@@ -48,35 +48,36 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
             alt={title}
             fill // Utiliser fill pour remplir le conteneur
             className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
           {/* Badge Catégorie (si fourni) */}
           {category && (
-            <div className="absolute top-2 right-2 bg-pink-600 text-white text-xs px-2 py-1 rounded shadow">
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-pink-600 text-white text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded shadow">
               {category}
             </div>
           )}
         </div>
-        <div className="p-4">
+        <div className="p-2 sm:p-3 md:p-4">
           {/* Titre avec police spécifique */}
-          <h3 className={`text-lg font-semibold mb-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors ${playfairDisplay.className}`}>
+          <h3 className={`text-sm sm:text-base md:text-lg font-semibold mb-1 sm:mb-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors line-clamp-2 ${playfairDisplay.className}`}>
             {title}
           </h3>
           {/* Description courte (si fournie) */}
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{description}</p>
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-3 line-clamp-2">{description}</p>
           )}
           {/* Informations : Difficulté et Temps Total */}
-          <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-2">
+          <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-1 sm:mt-2">
             {difficulty && (
               <span className="flex items-center">
-                <BarChart className="w-3 h-3 mr-1" />
-                {difficulty}
+                <BarChart className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
+                <span className="hidden sm:inline">{difficulty}</span>
+                <span className="sm:hidden">{difficulty.charAt(0)}</span>
               </span>
             )}
             {totalTime > 0 && (
               <span className="flex items-center">
-                <Clock className="w-3 h-3 mr-1" />
+                <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
                 {totalTime} min
               </span>
             )}
