@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { Prisma } from '@prisma/client'; // Importer Prisma pour les types d'erreur
 
-const BUCKET_NAME = 'creations'; // Assurer que le nom du bucket est défini
+const BUCKET_NAME = 'images'; // Utiliser le même bucket que les recettes pour la cohérence
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
@@ -137,27 +137,47 @@ export async function PUT(
       // Upload de la nouvelle image
       const fileExtension = imageFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExtension}`;
-      const filePath = `${fileName}`;
+      const uploadedImagePath = `creations/${fileName}`; // Chemin avec préfixe
 
       const { error: uploadError } = await supabaseAdminClient.storage
         .from(BUCKET_NAME)
-        .upload(filePath, imageFile);
+        .upload(uploadedImagePath, imageFile);
 
       if (uploadError) {
         console.error("Erreur d'upload Supabase:", uploadError);
         throw new Error(`Erreur lors de l'upload de l'image: ${uploadError.message}`);
       }
 
-      // Nouvelle méthode : Construire l'URL manuellement
-      const supabasePublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; // Assurez-vous que cette variable existe
-      if (supabasePublicUrl) {
-        newImageUrl = `${supabasePublicUrl}/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
+      // Appel à la fonction Edge image-converter
+      console.log(`[API Creations PUT] Appel de image-converter pour: ${uploadedImagePath}`);
+      const { data: conversionResult, error: conversionFnError } = await supabaseAdminClient.functions.invoke('image-converter', {
+        body: { bucketName: BUCKET_NAME, filePath: uploadedImagePath }
+      });
+
+      let finalImagePath = uploadedImagePath; // Par défaut, l'image originale
+
+      if (conversionFnError) {
+        console.error('[API Creations PUT] Erreur fonction Edge image-converter:', conversionFnError.message);
+        // Continuer avec l'image originale si la conversion échoue
+      } else if (conversionResult) {
+        console.log('[API Creations PUT] Résultat image-converter:', conversionResult);
+        finalImagePath = conversionResult.newFilePath || conversionResult.originalFilePath || uploadedImagePath;
+      }
+      
+      console.log(`[API Creations PUT] Chemin final de l'image après conversion (ou non): ${finalImagePath}`);
+
+      // Obtenir l'URL publique avec le chemin final
+      const { data: publicUrlData } = supabaseAdminClient.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(finalImagePath);
+
+      if (publicUrlData?.publicUrl) {
+        newImageUrl = publicUrlData.publicUrl;
         dataToUpdate.image = newImageUrl;
-        console.log("URL publique construite :", newImageUrl); // Log pour vérifier
+        console.log("URL publique obtenue :", newImageUrl);
       } else {
-        console.error("NEXT_PUBLIC_SUPABASE_URL n'est pas définie. Impossible de construire l'URL publique.");
+        console.error("Impossible d'obtenir l'URL publique pour:", finalImagePath);
         newImageUrl = oldImageUrl; // Garder l'ancienne URL en cas d'échec
-        // Pas de dataToUpdate.image ici
       }
     }
     // Si aucune nouvelle image n'est fournie, dataToUpdate.image reste non défini,

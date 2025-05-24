@@ -77,10 +77,24 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
     },
   });
 
-  // Gestionnaire de changement d'image restauré
+  // Gestionnaire de changement d'image avec validation des types HEIC/HEIF
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+
     if (file) {
+      if (!acceptedTypes.includes(file.type)) {
+        toast({
+          title: "Type de fichier non supporté",
+          description: `Le format ${file.type} n'est pas accepté. Veuillez choisir un fichier JPEG, PNG, WEBP, GIF, HEIC ou HEIF.`,
+        });
+        // Réinitialiser l'input si le type est incorrect
+        if (event.target) {
+          event.target.value = "";
+        }
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -251,7 +265,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
                   <Input
                     id="picture"
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg, image/png, image/webp, image/gif, image/heic, image/heif"
                     onChange={handleImageChange} // Gestionnaire restauré
                     className="hidden"
                     disabled={isSubmitting}

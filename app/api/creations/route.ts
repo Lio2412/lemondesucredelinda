@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'; // Importer createClient d
 // Ne plus importer supabaseAdmin d'ici
 import { v4 as uuidv4 } from 'uuid'; // Pour générer des noms de fichiers uniques
 
-const BUCKET_NAME = 'creations'; // Nom du bucket fourni par l'utilisateur
+const BUCKET_NAME = 'images'; // Utiliser le même bucket que les recettes pour la cohérence
 
 export async function POST(req: Request) {
   try {
@@ -44,26 +44,44 @@ export async function POST(req: Request) {
 
       const fileExtension = imageFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExtension}`; // Nom de fichier unique
-      const filePath = `${fileName}`; // Chemin dans le bucket
+      const uploadedImagePath = `creations/${fileName}`; // Chemin dans le bucket avec préfixe
 
       // Utiliser supabaseAdmin pour l'upload (contourne RLS)
       // Utiliser le client local supabaseAdminClient pour l'upload
       const { data: uploadData, error: uploadError } = await supabaseAdminClient.storage
         .from(BUCKET_NAME)
-        .upload(filePath, imageFile);
+        .upload(uploadedImagePath, imageFile);
 
       if (uploadError) {
         console.error("Erreur d'upload Supabase:", uploadError);
         throw new Error(`Erreur lors de l'upload de l'image: ${uploadError.message}`);
       }
 
+      // Appel à la fonction Edge image-converter
+      console.log(`[API Creations POST] Appel de image-converter pour: ${uploadedImagePath}`);
+      const { data: conversionResult, error: conversionFnError } = await supabaseAdminClient.functions.invoke('image-converter', {
+        body: { bucketName: BUCKET_NAME, filePath: uploadedImagePath }
+      });
+
+      let finalImagePath = uploadedImagePath; // Par défaut, l'image originale
+
+      if (conversionFnError) {
+        console.error('[API Creations POST] Erreur fonction Edge image-converter:', conversionFnError.message);
+        // Continuer avec l'image originale si la conversion échoue
+      } else if (conversionResult) {
+        console.log('[API Creations POST] Résultat image-converter:', conversionResult);
+        finalImagePath = conversionResult.newFilePath || conversionResult.originalFilePath || uploadedImagePath;
+      }
+      
+      console.log(`[API Creations POST] Chemin final de l'image après conversion (ou non): ${finalImagePath}`);
+
       // Obtenir l'URL publique avec le client local
       const { data: publicUrlData } = supabaseAdminClient.storage
         .from(BUCKET_NAME)
-        .getPublicUrl(filePath);
+        .getPublicUrl(finalImagePath); // Utiliser finalImagePath
 
       if (!publicUrlData?.publicUrl) {
-         console.error("Impossible d'obtenir l'URL publique pour:", filePath);
+         console.error("Impossible d'obtenir l'URL publique pour:", finalImagePath);
          // Que faire ici ? Continuer sans image ou retourner une erreur ?
          // Pour l'instant, on continue sans image, mais on logue l'erreur.
          imageUrl = null;
