@@ -82,11 +82,26 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
     const file = event.target.files?.[0];
     const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
 
+    // Log de diagnostic pour iOS
+    console.log('[iOS Debug] File selected:', {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+      userAgent: navigator.userAgent,
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+    });
+
     if (file) {
-      if (!acceptedTypes.includes(file.type)) {
+      // Validation plus permissive pour iOS
+      const isValidType = acceptedTypes.includes(file.type) ||
+                         file.type === '' || // iOS peut parfois ne pas détecter le type
+                         /^image\//.test(file.type); // Accepter tout type d'image comme fallback
+
+      if (!isValidType) {
+        console.log('[iOS Debug] File type validation failed:', file.type);
         toast({
           title: "Type de fichier non supporté",
-          description: `Le format ${file.type} n'est pas accepté. Veuillez choisir un fichier JPEG, PNG, WEBP, GIF, HEIC ou HEIF.`,
+          description: `Le format ${file.type || 'inconnu'} n'est pas accepté. Veuillez choisir un fichier image valide.`,
         });
         // Réinitialiser l'input si le type est incorrect
         if (event.target) {
@@ -94,6 +109,8 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
         }
         return;
       }
+
+      console.log('[iOS Debug] File validation passed');
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -265,7 +282,7 @@ export function CreationForm({ initialData, creationId, onSubmitSuccess }: Creat
                   <Input
                     id="picture"
                     type="file"
-                    accept="image/jpeg, image/png, image/webp, image/gif, image/heic, image/heif"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*"
                     onChange={handleImageChange} // Gestionnaire restauré
                     className="hidden"
                     disabled={isSubmitting}

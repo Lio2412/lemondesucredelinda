@@ -40,13 +40,32 @@ export function ShareRecipeCompletion({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+
+    // Log de diagnostic pour iOS
+    console.log('[iOS Debug] Share file selected:', {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+      userAgent: navigator.userAgent,
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+    });
     const maxSize = 5 * 1024 * 1024; // 5MB
 
-    if (!validTypes.includes(file.type)) {
-      toast.error("Format non supporté", { description: "Veuillez utiliser une image au format JPG, PNG ou WebP" });
+    // Validation plus permissive pour iOS
+    const isValidType = validTypes.includes(file.type) ||
+                       file.type === '' || // iOS peut parfois ne pas détecter le type
+                       /^image\//.test(file.type); // Accepter tout type d'image comme fallback
+
+    if (!isValidType) {
+      console.log('[iOS Debug] Share file type validation failed:', file.type);
+      toast.error("Format non supporté", {
+        description: `Veuillez utiliser une image au format JPG, PNG, WebP, GIF, HEIC ou HEIF. Format détecté: ${file.type || 'inconnu'}`
+      });
       return;
     }
+
+    console.log('[iOS Debug] Share file validation passed');
 
     if (file.size > maxSize) {
       toast.error("Image trop volumineuse", { description: "La taille maximale est de 5MB" });
@@ -147,7 +166,7 @@ export function ShareRecipeCompletion({
                 </div>
                 <Input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*"
                   className="hidden"
                   onChange={handleImageChange}
                 />

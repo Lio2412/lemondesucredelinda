@@ -140,24 +140,36 @@ export function RecipeForm({ initialData = null, recipeId }: RecipeFormProps) { 
     const file = event.target.files?.[0];
     const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
 
+    // Log de diagnostic pour iOS
+    console.log('[iOS Debug] Recipe file selected:', {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+      userAgent: navigator.userAgent,
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+    });
+
     if (file) {
-      if (!acceptedTypes.includes(file.type)) {
+      // Validation plus permissive pour iOS
+      const isValidType = acceptedTypes.includes(file.type) ||
+                         file.type === '' || // iOS peut parfois ne pas détecter le type
+                         /^image\//.test(file.type); // Accepter tout type d'image comme fallback
+
+      if (!isValidType) {
+        console.log('[iOS Debug] Recipe file type validation failed:', file.type);
         toast({
           title: "Type de fichier non supporté",
-          description: `Le format ${file.type} n'est pas accepté. Veuillez choisir un fichier JPEG, PNG, WEBP ou GIF.`,
+          description: `Le format ${file.type || 'inconnu'} n'est pas accepté. Veuillez choisir un fichier image valide.`,
           variant: "destructive",
         });
         // Réinitialiser l'input si le type est incorrect
         if (event.target) {
           event.target.value = "";
         }
-        // Ne pas mettre à jour l'aperçu ni le formulaire
-        // Il est important de ne pas appeler setImagePreview(null) ou form.setValue('image', undefined) ici
-        // si on veut garder l'image précédente en cas d'erreur de sélection.
-        // Si l'intention est de vider le champ en cas d'erreur, alors on pourrait les appeler.
-        // Pour l'instant, on empêche juste la sélection du fichier invalide.
         return;
       }
+
+      console.log('[iOS Debug] Recipe file validation passed');
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -405,7 +417,7 @@ formData.append('image', imageFile);
                    <Input
                      id="recipeImage"
                      type="file"
-                     accept="image/jpeg, image/png, image/webp, image/gif, image/heic, image/heif"
+                     accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*"
                      onChange={handleImageChange}
                      className="hidden"
                      disabled={isSubmitting}
